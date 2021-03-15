@@ -26,6 +26,9 @@ fun Application.module(testing: Boolean = false) {
             setPrettyPrinting()
         }
     }
+    install(DefaultHeaders)
+    install(CallLogging)
+    install(Routing)
 
     routing {
         get("/") {
