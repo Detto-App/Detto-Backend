@@ -1,6 +1,7 @@
 package com.dettoapp
 
 import com.dettoapp.data.User
+import com.dettoapp.routes.registerUser
 import io.ktor.application.*
 import io.ktor.response.*
 import io.ktor.request.*
@@ -20,7 +21,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
 
-    val list2:ArrayList<User> = ArrayList()
+    val list2: ArrayList<User> = ArrayList()
     install(ContentNegotiation) {
         gson {
             setPrettyPrinting()
@@ -29,6 +30,9 @@ fun Application.module(testing: Boolean = false) {
     install(DefaultHeaders)
     install(CallLogging)
     install(Routing)
+    {
+        registerUser()
+    }
 
     routing {
         get("/") {
@@ -48,8 +52,7 @@ fun Application.module(testing: Boolean = false) {
             val users = try {
                 call.receive<User>()
                 //call.respond("Done")
-            }catch (e:ContentTransformationException)
-            {
+            } catch (e: ContentTransformationException) {
                 call.respond(HttpStatusCode.BadGateway)
                 return@post
             }
@@ -59,7 +62,7 @@ fun Application.module(testing: Boolean = false) {
 
         get("/data")
         {
-            call.respond(HttpStatusCode.OK,list2)
+            call.respond(HttpStatusCode.OK, list2)
         }
     }
 }
