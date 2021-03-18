@@ -19,12 +19,12 @@ fun Route.registerUser() {
 
     route("/studentRegis")
     {
-        get {
+        post {
             val request = try {
                 call.receive<StudentModel>()
             } catch (e: ContentTransformationException) {
                 call.respond(HttpStatusCode.BadRequest)
-                return@get
+                return@post
             }
             call.respond(HttpStatusCode.OK)
         }
@@ -32,12 +32,12 @@ fun Route.registerUser() {
 
     route("/teacherRegis")
     {
-        get {
+        post {
             val request = try {
                 call.receive<TeacherModel>()
             } catch (e: ContentTransformationException) {
                 call.respond(HttpStatusCode.BadRequest)
-                return@get
+                return@post
             }
             call.respond(HttpStatusCode.OK)
         }
@@ -45,14 +45,14 @@ fun Route.registerUser() {
 
     route("/gets")
     {
-        post {
+        get {
             call.respond(HttpStatusCode.OK,studentsList)
         }
     }
 
     route("/gett")
     {
-        post {
+        get {
             call.respond(HttpStatusCode.OK,teachersList)
         }
     }
