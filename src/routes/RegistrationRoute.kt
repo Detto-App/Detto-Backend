@@ -26,6 +26,7 @@ fun Route.registerUser() {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
+            studentsList.add(request)
             call.respond(HttpStatusCode.OK)
         }
     }
