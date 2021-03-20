@@ -24,9 +24,9 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 fun Application.module(testing: Boolean = false) {
 
 
-    CoroutineScope(Dispatchers.IO).launch {
-        students.insertOne(StudentModel("vikas","vikas2${Random(123).nextInt()}@gmail.com","1234","1ds17cs123"))
-    }
+//    CoroutineScope(Dispatchers.IO).launch {
+//        students.insertOne(StudentModel("vikas","vikas2${Random(123).nextInt()}@gmail.com","1234","1ds17cs123"))
+//    }
 
     val list2: ArrayList<User> = ArrayList()
     install(ContentNegotiation) {

@@ -57,7 +57,7 @@ fun Route.registerUser() {
         get {
             try {
                 val list = students.find().toList()
-                call.respond(HttpStatusCode.OK,list.toString())
+                call.respond(HttpStatusCode.OK,list)
             }catch (e:Exception)
             {
                 println(e.localizedMessage)
