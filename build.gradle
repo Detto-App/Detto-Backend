@@ -39,8 +39,10 @@ dependencies {
     implementation "io.ktor:ktor-gson:$ktor_version"
     implementation "io.ktor:ktor-client-core:$ktor_version"
     implementation "io.ktor:ktor-client-core-jvm:$ktor_version"
+    implementation "io.ktor:ktor-jackson:$ktor_version"
     implementation "io.ktor:ktor-client-jetty:$ktor_version"
     testImplementation "io.ktor:ktor-server-tests:$ktor_version"
+
 
     implementation 'org.litote.kmongo:kmongo:4.2.4'
     implementation 'org.litote.kmongo:kmongo-coroutine:4.2.4'
