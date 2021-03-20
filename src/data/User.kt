@@ -1,4 +1,3 @@
 package com.dettoapp.data
 
-open class User(val name:String,val email:String,val uid: String){
-}
+open class User(open val name:String, open val email:String, open val uid: String)

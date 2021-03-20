@@ -1,3 +1,7 @@
 package com.dettoapp.data
 
-data class StudentModel(val sName: String, val sEmail: String, val sUid: String, val sUSN: String) : User(sName, sEmail, sUid)
+import org.bson.codecs.pojo.annotations.BsonId
+
+
+data class StudentModel(override val name: String, @BsonId override val email: String, override val uid: String, val susn: String)
+    : User(name, email, uid)

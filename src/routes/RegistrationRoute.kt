@@ -1,5 +1,6 @@
 package com.dettoapp.routes
 
+import com.dettoapp.data.ReceivingUserModel
 import com.dettoapp.data.StudentModel
 import com.dettoapp.data.TeacherModel
 import io.ktor.application.call
@@ -11,11 +12,18 @@ import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
+import org.litote.kmongo.coroutine.coroutine
+import org.litote.kmongo.eq
+import org.litote.kmongo.reactivestreams.KMongo
+import sun.rmi.runtime.Log
+
+
+private val client = KMongo.createClient().coroutine
+private val database = client.getDatabase("UsersDatabase")
+private val teachers = database.getCollection<TeacherModel>()
+val students = database.getCollection<StudentModel>()
 
 fun Route.registerUser() {
-
-    val studentsList = ArrayList<StudentModel>()
-    val teachersList = ArrayList<TeacherModel>()
 
     route("/studentRegis")
     {
@@ -26,7 +34,7 @@ fun Route.registerUser() {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
-            studentsList.add(request)
+            students.insertOne(request)
             call.respond(HttpStatusCode.OK)
         }
     }
@@ -47,14 +55,26 @@ fun Route.registerUser() {
     route("/gets")
     {
         get {
-            call.respond(HttpStatusCode.OK,studentsList)
+            try {
+                val list = students.find().toList()
+                call.respond(HttpStatusCode.OK,list.toString())
+            }catch (e:Exception)
+            {
+                println(e.localizedMessage)
+                call.respond(HttpStatusCode.OK,e.localizedMessage)
+            }
         }
     }
 
-    route("/gett")
+//    route("/gett")
+//    {
+//        get {
+//            call.respond(HttpStatusCode.OK,teachersList)
+//        }
+//    }
+
+    route("/getDetails/{email}")
     {
-        get {
-            call.respond(HttpStatusCode.OK,teachersList)
-        }
+
     }
 }
