@@ -1,10 +1,16 @@
 package com.dettoapp
 
+import com.dettoapp.Utility.Constants
+import com.dettoapp.auth.JwtConfig
 import com.dettoapp.data.StudentModel
 import com.dettoapp.data.User
 import com.dettoapp.routes.registerUser
 import com.dettoapp.routes.students
 import io.ktor.application.*
+import io.ktor.auth.Authentication
+import io.ktor.auth.UserIdPrincipal
+import io.ktor.auth.authenticate
+import io.ktor.auth.jwt.jwt
 import io.ktor.response.*
 import io.ktor.request.*
 import io.ktor.routing.*
@@ -23,19 +29,30 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
 
-
 //    CoroutineScope(Dispatchers.IO).launch {
-//        students.insertOne(StudentModel("vikas","vikas2${Random(123).nextInt()}@gmail.com","1234","1ds17cs123"))
+//        students.collection.drop()
 //    }
 
-    val list2: ArrayList<User> = ArrayList()
+    install(DefaultHeaders)
+    install(CallLogging)
     install(ContentNegotiation) {
         gson {
             setPrettyPrinting()
         }
     }
-    install(DefaultHeaders)
-    install(CallLogging)
+
+    install(Authentication)
+    {
+        jwt {
+            verifier(JwtConfig.verifier)
+            realm = Constants.ISSUER
+
+            validate {
+                UserIdPrincipal( it.payload.getClaim("id").asString())
+            }
+        }
+    }
+
     install(Routing)
     {
         registerUser()
@@ -63,13 +80,28 @@ fun Application.module(testing: Boolean = false) {
                 call.respond(HttpStatusCode.BadGateway)
                 return@post
             }
-            list2.add(users)
             call.respond(HttpStatusCode.OK)
         }
 
         get("/data")
         {
-            call.respond(HttpStatusCode.OK, list2)
+            call.respond(HttpStatusCode.OK, "empty")
+        }
+
+        post("/login") {
+            val credentials = call.receive<StudentModel>()
+            val token = JwtConfig.makeToken(credentials)
+            call.respondText(token)
+        }
+
+        authenticate {
+            route("/sec")
+            {
+                get {
+                    call.respond(HttpStatusCode.OK,"Hello")
+                }
+            }
+
         }
     }
 }
