@@ -68,8 +68,6 @@ fun Route.registerUser() {
     route("/deleteAllStudents")
     {
         get {
-
-            //database.database.getCollection(KMongoUtil.defaultCollectionName(StudentModel::class)).deleteMany(Document())
             students.deleteMany(Document())
             call.respond(HttpStatusCode.OK)
         }
@@ -82,36 +80,6 @@ fun Route.registerUser() {
             call.respond(HttpStatusCode.OK)
         }
     }
-
-
-
-//    route("/studentRegis")
-//    {
-//        post {
-//            val request2 = try {
-//                println()
-//                call.receive<StudentModel>()
-//            } catch (e: ContentTransformationException) {
-//                call.respond(HttpStatusCode.BadRequest)
-//                return@post
-//            }
-//            students.insertOne(request2)
-//            call.respond(HttpStatusCode.OK, call.request.headers["vid"] ?: "")
-//        }
-//    }
-//
-//    route("/teacherRegis")
-//    {
-//        post {
-//            val request = try {
-//                call.receive<TeacherModel>()
-//            } catch (e: ContentTransformationException) {
-//                call.respond(HttpStatusCode.BadRequest)
-//                return@post
-//            }
-//            call.respond(HttpStatusCode.OK)
-//        }
-//    }
 
     route("/gets")
     {
@@ -145,26 +113,50 @@ fun Route.registerUser() {
             val role = call.request.headers["role"]?.toInt()
             val email = call.parameters["email"]
 
-            if(role==0)
-            {
-                val teacher= teachers.findOne(TeacherModel::email eq email)
-
-
-//                if(teacher!=null)
-//                {
-//                    val token = JwtConfig.makeToken(teacher)
-//                    call.respond(HttpStatusCode.OK,ReceivingUserModel(teacher=teacher,token =token ))
-//                }
+            if (role == 0) {
+                val teacher = teachers.findOne(TeacherModel::email eq email)
+                if (teacher != null) {
+                    val token = JwtConfig.makeToken(teacher)
+                    call.respond(HttpStatusCode.OK, ReceivingUserModel(teacher = teacher, token = token))
+                } else
+                    call.respond(HttpStatusCode.BadRequest)
+            } else if (role == 1) {
+                val student = students.findOne(TeacherModel::email eq email)
+                if (student != null) {
+                    val token = JwtConfig.makeToken(student)
+                    call.respond(HttpStatusCode.OK, ReceivingUserModel(student = student, token = token))
+                } else
+                    call.respond(HttpStatusCode.BadRequest)
             }
-
-
-
-            val user = students.findOne(StudentModel::email eq call.parameters["email"])
-
-            if (user != null)
-                call.respond(HttpStatusCode.OK, user)
-            else
-                call.respond(HttpStatusCode.BadRequest)
         }
     }
 }
+
+
+//    route("/studentRegis")
+//    {
+//        post {
+//            val request2 = try {
+//                println()
+//                call.receive<StudentModel>()
+//            } catch (e: ContentTransformationException) {
+//                call.respond(HttpStatusCode.BadRequest)
+//                return@post
+//            }
+//            students.insertOne(request2)
+//            call.respond(HttpStatusCode.OK, call.request.headers["vid"] ?: "")
+//        }
+//    }
+//
+//    route("/teacherRegis")
+//    {
+//        post {
+//            val request = try {
+//                call.receive<TeacherModel>()
+//            } catch (e: ContentTransformationException) {
+//                call.respond(HttpStatusCode.BadRequest)
+//                return@post
+//            }
+//            call.respond(HttpStatusCode.OK)
+//        }
+//    }
