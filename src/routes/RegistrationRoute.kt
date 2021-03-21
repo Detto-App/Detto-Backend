@@ -1,6 +1,7 @@
 package com.dettoapp.routes
 
 import com.dettoapp.auth.JwtConfig
+import com.dettoapp.data.ReceivingUserModel
 import com.dettoapp.data.StudentModel
 import com.dettoapp.data.TeacherModel
 import com.dettoapp.data.Token
@@ -18,6 +19,7 @@ import io.ktor.routing.route
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitLast
 import org.bson.Document
+import org.eclipse.jetty.http.HttpStatus
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.coroutine.toList
 import org.litote.kmongo.eq
@@ -72,6 +74,16 @@ fun Route.registerUser() {
             call.respond(HttpStatusCode.OK)
         }
     }
+
+    route("/deleteAllTeachers")
+    {
+        get {
+            teachers.deleteMany(Document())
+            call.respond(HttpStatusCode.OK)
+        }
+    }
+
+
 
 //    route("/studentRegis")
 //    {
@@ -130,6 +142,23 @@ fun Route.registerUser() {
     route("/getDetails/{email}")
     {
         get {
+            val role = call.request.headers["role"]?.toInt()
+            val email = call.parameters["email"]
+
+            if(role==0)
+            {
+                val teacher= teachers.findOne(TeacherModel::email eq email)
+
+
+//                if(teacher!=null)
+//                {
+//                    val token = JwtConfig.makeToken(teacher)
+//                    call.respond(HttpStatusCode.OK,ReceivingUserModel(teacher=teacher,token =token ))
+//                }
+            }
+
+
+
             val user = students.findOne(StudentModel::email eq call.parameters["email"])
 
             if (user != null)
