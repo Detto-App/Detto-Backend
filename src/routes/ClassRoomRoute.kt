@@ -33,6 +33,7 @@ fun Route.classroomRoute() {
                 }
             }
         }
+    }
         route("/class") {
             get {
 
@@ -46,4 +47,3 @@ fun Route.classroomRoute() {
             }
         }
     }
-}
