@@ -4,6 +4,7 @@ import com.dettoapp.Utility.Constants
 import com.dettoapp.auth.JwtConfig
 import com.dettoapp.data.StudentModel
 import com.dettoapp.data.User
+import com.dettoapp.routes.classroomRoute
 import com.dettoapp.routes.registerUser
 import com.dettoapp.routes.students
 import io.ktor.application.*
@@ -56,6 +57,7 @@ fun Application.module(testing: Boolean = false) {
     install(Routing)
     {
         registerUser()
+        classroomRoute()
     }
 
     routing {
