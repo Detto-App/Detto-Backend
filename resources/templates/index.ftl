@@ -9,6 +9,6 @@
 </script>
 </head>
 <body onload="load('${id}')">
-<h1>Hello, !</h1>
+<h1>Opening in App..</h1>
 </body>
 </html>
