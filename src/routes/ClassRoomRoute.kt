@@ -74,7 +74,7 @@ fun Route.classroomRoute() {
     {
         get {
             var id = call.parameters["classid"]
-            id="/cid/${id}"
+            id="cid/${id}"
             call.respond(FreeMarkerContent("index.ftl", mapOf("id" to id)))
         }
     }
