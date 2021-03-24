@@ -5,6 +5,7 @@ import com.dettoapp.data.ReceivingUserModel
 import com.dettoapp.data.StudentModel
 import com.dettoapp.data.TeacherModel
 import com.dettoapp.data.Token
+import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.client.engine.callContext
 import io.ktor.features.ContentTransformationException
@@ -16,8 +17,10 @@ import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitLast
+import kotlinx.coroutines.withContext
 import org.bson.Document
 import org.eclipse.jetty.http.HttpStatus
 import org.litote.kmongo.coroutine.coroutine
@@ -26,12 +29,15 @@ import org.litote.kmongo.eq
 import org.litote.kmongo.inc
 import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.util.KMongoUtil
+import java.util.concurrent.Executors
 
 
 private val client = KMongo.createClient().coroutine
 private val database = client.getDatabase("UsersDatabase")
 private val teachers = database.getCollection<TeacherModel>()
 val students = database.getCollection<StudentModel>("students")
+
+val compute = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
 
 fun Route.registerUser() {
 
@@ -98,14 +104,16 @@ fun Route.registerUser() {
     {
         get {
             try {
-                val list = teachers.find().toList()
-                call.respond(HttpStatusCode.OK, list)
+//                val list = teachers.find().toList()
+                call.getTeacherDetails()
             } catch (e: Exception) {
                 println(e.localizedMessage)
                 call.respond(HttpStatusCode.OK, e.localizedMessage)
             }
         }
     }
+
+
 
     route("/getDetails/{email}")
     {
@@ -160,3 +168,13 @@ fun Route.registerUser() {
 //            call.respond(HttpStatusCode.OK)
 //        }
 //    }
+
+private suspend fun ApplicationCall.getTeacherDetails()
+{
+    var list : List<TeacherModel>
+    withContext(compute)
+    {
+         list = teachers.find().toList()
+    }
+    respond(HttpStatusCode.OK,list)
+}
