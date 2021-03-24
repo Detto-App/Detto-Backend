@@ -7,6 +7,7 @@ import com.dettoapp.data.User
 import com.dettoapp.routes.classroomRoute
 import com.dettoapp.routes.registerUser
 import com.dettoapp.routes.students
+import freemarker.cache.ClassTemplateLoader
 import io.ktor.application.*
 import io.ktor.auth.Authentication
 import io.ktor.auth.UserIdPrincipal
@@ -18,6 +19,8 @@ import io.ktor.routing.*
 import io.ktor.http.*
 import io.ktor.gson.*
 import io.ktor.features.*
+import io.ktor.freemarker.FreeMarker
+import io.ktor.freemarker.FreeMarkerContent
 import io.ktor.request.ContentTransformationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +36,10 @@ fun Application.module(testing: Boolean = false) {
 //    CoroutineScope(Dispatchers.IO).launch {
 //        students.collection.drop()
 //    }
+
+    install(FreeMarker) {
+        templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
+    }
 
     install(DefaultHeaders)
     install(CallLogging)
@@ -105,6 +112,8 @@ fun Application.module(testing: Boolean = false) {
             }
 
         }
+
+
     }
 }
 

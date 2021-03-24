@@ -1,8 +1,10 @@
 package com.dettoapp.routes
 
 import com.dettoapp.data.Classroom
+import com.dettoapp.data.User
 import io.ktor.application.call
 import io.ktor.auth.authenticate
+import io.ktor.freemarker.FreeMarkerContent
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
 import io.ktor.response.*
@@ -64,6 +66,15 @@ fun Route.classroomRoute() {
                     return@get
                 }
             }
+        }
+    }
+
+    route("/cid/{classid}")
+    {
+        get {
+            val id = call.parameters["classid"]
+            val user = User("vv","dfdsf","uid")
+            call.respond(FreeMarkerContent("index.ftl", mapOf("id" to id)))
         }
     }
 }

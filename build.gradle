@@ -53,6 +53,9 @@ dependencies {
     implementation 'org.litote.kmongo:kmongo:4.2.4'
     implementation 'org.litote.kmongo:kmongo-coroutine:4.2.4'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3'
+
+    implementation "io.ktor:ktor-freemarker:$ktor_version"
+
 }
 application {
     mainClassName = "io.ktor.server.netty.EngineMain"
