@@ -28,8 +28,9 @@ fun Route.classroomRoute() {
             post {
                 try {
                     val incomingClassRoomData = call.receive<Classroom>()
-                    classRoomCollection.insertOne(incomingClassRoomData)
-                    call.respond(HttpStatusCode.OK)
+                    print(incomingClassRoomData)
+                    //classRoomCollection.insertOne(incomingClassRoomData)
+                    call.respond(HttpStatusCode.OK,incomingClassRoomData)
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest)
                     return@post
