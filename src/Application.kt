@@ -33,14 +33,6 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
 
-//    CoroutineScope(Dispatchers.IO).launch {
-//        students.collection.drop()
-//    }
-
-    install(FreeMarker) {
-        templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
-    }
-
     install(DefaultHeaders)
     install(CallLogging)
     install(ContentNegotiation) {
@@ -59,6 +51,10 @@ fun Application.module(testing: Boolean = false) {
                 UserIdPrincipal( it.payload.getClaim("id").asString())
             }
         }
+    }
+
+    install(FreeMarker) {
+        templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
     }
 
     install(Routing)
@@ -112,8 +108,6 @@ fun Application.module(testing: Boolean = false) {
             }
 
         }
-
-
     }
 }
 

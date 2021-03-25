@@ -37,8 +37,6 @@ private val database = client.getDatabase("UsersDatabase")
 private val teachers = database.getCollection<TeacherModel>()
 val students = database.getCollection<StudentModel>("students")
 
-val compute = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
-
 fun Route.registerUser() {
 
     route("/registerStudent")
@@ -104,16 +102,14 @@ fun Route.registerUser() {
     {
         get {
             try {
-//                val list = teachers.find().toList()
-                call.getTeacherDetails()
+                val list : List<TeacherModel> = teachers.find().toList()
+                call.respond(HttpStatusCode.OK,list)
             } catch (e: Exception) {
                 println(e.localizedMessage)
                 call.respond(HttpStatusCode.OK, e.localizedMessage)
             }
         }
     }
-
-
 
     route("/getDetails/{email}")
     {
@@ -140,6 +136,16 @@ fun Route.registerUser() {
     }
 }
 
+//val compute = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
+//private suspend fun ApplicationCall.getTeacherDetails()
+//{
+//    var list : List<TeacherModel>
+//    withContext(compute)
+//    {
+//        list = teachers.find().toList()
+//    }
+//    respond(HttpStatusCode.OK,list)
+//}
 
 //    route("/studentRegis")
 //    {
@@ -169,12 +175,3 @@ fun Route.registerUser() {
 //        }
 //    }
 
-private suspend fun ApplicationCall.getTeacherDetails()
-{
-    var list : List<TeacherModel>
-    withContext(compute)
-    {
-         list = teachers.find().toList()
-    }
-    respond(HttpStatusCode.OK,list)
-}
