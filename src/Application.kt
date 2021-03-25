@@ -4,6 +4,7 @@ import com.dettoapp.Utility.Constants
 import com.dettoapp.auth.JwtConfig
 import com.dettoapp.data.StudentModel
 import com.dettoapp.data.User
+import com.dettoapp.routes.classRoomCollection
 import com.dettoapp.routes.classroomRoute
 import com.dettoapp.routes.registerUser
 import com.dettoapp.routes.students
@@ -33,11 +34,17 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
 
+
+//    CoroutineScope(Dispatchers.IO).launch{
+//        classRoomCollection.drop()
+//    }
+
     install(DefaultHeaders)
     install(CallLogging)
     install(ContentNegotiation) {
         gson {
             setPrettyPrinting()
+            serializeNulls()
         }
     }
 
