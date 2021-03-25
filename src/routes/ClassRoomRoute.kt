@@ -20,28 +20,27 @@ import kotlin.Exception
 
 private val client = KMongo.createClient().coroutine
 private val database = client.getDatabase("UsersDatabase")
-val classRoomCollection = database.getCollection<Classroom>("c2")
+val classRoomCollection = database.getCollection<Classroom>()
 
 
 fun Route.classroomRoute() {
     authenticate {
+        route("/createClassroom") {
+            post {
+                try {
+                    val incomingClassRoomData = call.receive<Classroom>()
+                    classRoomCollection.insertOne(incomingClassRoomData)
+                    call.respond(HttpStatusCode.OK)
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest)
+                    return@post
 
-    }
-
-    route("/createClassroom") {
-        post {
-            try {
-                val incomingClassRoomData = call.receive<Classroom>()
-                //println("class"+incomingClassRoomData)
-                classRoomCollection.insertOne(incomingClassRoomData)
-                call.respond(HttpStatusCode.OK, incomingClassRoomData)
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest)
-                return@post
-
+                }
             }
         }
     }
+
+
     route("/class") {
         get {
 
