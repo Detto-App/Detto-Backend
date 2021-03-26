@@ -1,12 +1,15 @@
 package com.dettoapp.routes
 
+import com.dettoapp.data.ClassRoomStudents
 import com.dettoapp.data.Classroom
+import com.dettoapp.data.StudentModel
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.freemarker.FreeMarkerContent
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
-import io.ktor.response.*
+import io.ktor.response.respond
+import io.ktor.response.respondText
 import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.post
@@ -14,13 +17,12 @@ import io.ktor.routing.route
 import org.bson.Document
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
-import org.litote.kmongo.inc
 import org.litote.kmongo.reactivestreams.KMongo
-import kotlin.Exception
 
 private val client = KMongo.createClient().coroutine
 private val database = client.getDatabase("UsersDatabase")
 val classRoomCollection = database.getCollection<Classroom>()
+val classRoomStudents = database.getCollection<ClassRoomStudents>()
 
 
 fun Route.classroomRoute() {
@@ -64,7 +66,6 @@ fun Route.classroomRoute() {
                         call.respond(HttpStatusCode.BadRequest)
                     else
                         call.respond(classroom)
-                    call.respondText("" + uid)
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest)
                     return@get
@@ -89,4 +90,13 @@ fun Route.classroomRoute() {
             call.respond(HttpStatusCode.OK)
         }
     }
+
+
+//    route("/regStudentToClass")
+//    {
+//        get {
+//            val x = call.receive<StudentModel>()
+//            classRoomStudents.insertOne()
+//        }
+//    }
 }
