@@ -4,10 +4,7 @@ import com.dettoapp.Utility.Constants
 import com.dettoapp.auth.JwtConfig
 import com.dettoapp.data.StudentModel
 import com.dettoapp.data.User
-import com.dettoapp.routes.classRoomCollection
-import com.dettoapp.routes.classroomRoute
-import com.dettoapp.routes.registerUser
-import com.dettoapp.routes.students
+import com.dettoapp.routes.*
 import freemarker.cache.ClassTemplateLoader
 import io.ktor.application.*
 import io.ktor.auth.Authentication
@@ -37,6 +34,8 @@ fun Application.module(testing: Boolean = false) {
 
 //    CoroutineScope(Dispatchers.IO).launch{
 //        classRoomCollection.drop()
+//        students.drop()
+//        classRoomStudents.drop()
 //    }
 
     install(DefaultHeaders)
