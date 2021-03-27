@@ -92,35 +92,38 @@ fun Route.classroomRoute() {
         }
     }
 
-    route("/regStudentToClassroom/{cid}") {
-        post {
-            try {
-                val cid = call.parameters["cid"]
-                val classroom = classRoomStudents.findOne(ClassRoomStudents::classID eq cid)
-                val incomingStudentModel = call.receive<StudentModel>()
-                if (classroom == null) {
-                    val set = HashSet<StudentModel>()
-                    set.add(incomingStudentModel)
-                    val classroomStudents = ClassRoomStudents(cid!!, set)
-                    classRoomStudents.insertOne(classroomStudents)
-                } else {
-                    val tempSet = classroom.studentList
-                    tempSet.add(incomingStudentModel)
-                    classRoomStudents.updateOne(
-                        ClassRoomStudents::classID eq cid,
-                        setValue(ClassRoomStudents::studentList, tempSet)
-                    )
+    authenticate {
+        route("/regStudentToClassroom/{cid}") {
+            post {
+                try {
+                    val cid = call.parameters["cid"]
+                    val classroom = classRoomStudents.findOne(ClassRoomStudents::classID eq cid)
+                    val incomingStudentModel = call.receive<StudentModel>()
+                    if (classroom == null) {
+                        val set = HashSet<StudentModel>()
+                        set.add(incomingStudentModel)
+                        val classroomStudents = ClassRoomStudents(cid!!, set)
+                        classRoomStudents.insertOne(classroomStudents)
+                    } else {
+                        val tempSet = classroom.studentList
+                        tempSet.add(incomingStudentModel)
+                        classRoomStudents.updateOne(
+                            ClassRoomStudents::classID eq cid,
+                            setValue(ClassRoomStudents::studentList, tempSet)
+                        )
+                    }
+                    call.respond(HttpStatusCode.OK)
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest, "" + e.localizedMessage)
+                    return@post
                 }
-                call.respond(HttpStatusCode.OK)
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest, "" + e.localizedMessage)
-                return@post
             }
         }
-
-
     }
-    authenticate {
+
+
+
+//    authenticate {
         route("/getClassStudents")
         {
             get {
@@ -133,7 +136,7 @@ fun Route.classroomRoute() {
 
             }
         }
-    }
+//    }
 }
 //    route("/regStudentToClass")
 //    {
