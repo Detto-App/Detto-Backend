@@ -24,6 +24,7 @@ private val client = KMongo.createClient().coroutine
 private val database = client.getDatabase("UsersDatabase")
 val classRoomCollection = database.getCollection<Classroom>()
 val classRoomStudents = database.getCollection<ClassRoomStudents>()
+val studentModel= database.getCollection<StudentModel>()
 
 
 fun Route.classroomRoute() {
@@ -112,6 +113,9 @@ fun Route.classroomRoute() {
                             setValue(ClassRoomStudents::studentList, tempSet)
                         )
                     }
+
+
+
                     call.respond(HttpStatusCode.OK)
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest, "" + e.localizedMessage)
