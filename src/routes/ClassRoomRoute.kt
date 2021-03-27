@@ -15,6 +15,7 @@ import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
 import org.bson.Document
+import org.eclipse.jetty.http.HttpStatus
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
 import org.litote.kmongo.reactivestreams.KMongo
@@ -161,19 +162,22 @@ fun Route.classroomRoute() {
         }
     }
 
-    route("/deleteClassroom{classid}")
-    {
-        get {
-            try {
-                val classID = call.parameters["classid"]
-                classRoomCollection.findOneAndDelete(Classroom::classroomuid eq classID)
-                classRoomStudents.findOneAndDelete(ClassRoomStudents::classID eq classID)
-            }catch (e:Exception)
-            {
-                call.respond(HttpStatusCode.BadRequest)
-                return@get
+    authenticate {
+        route("/deleteClassroom/{classid}")
+        {
+            get {
+                try {
+                    val classID = call.parameters["classid"]
+                    classRoomCollection.findOneAndDelete(Classroom::classroomuid eq classID)
+                    classRoomStudents.findOneAndDelete(ClassRoomStudents::classID eq classID)
+                    call.respond(HttpStatusCode.OK)
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest, "" + e.localizedMessage)
+                    return@get
+                }
             }
         }
     }
+
 }
 
