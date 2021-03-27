@@ -27,6 +27,7 @@ val classRoomStudents = database.getCollection<ClassRoomStudents>()
 
 
 fun Route.classroomRoute() {
+
     authenticate {
         route("/createClassroom") {
             post {
@@ -42,7 +43,6 @@ fun Route.classroomRoute() {
             }
         }
     }
-
 
     route("/class") {
         get {
@@ -108,8 +108,8 @@ fun Route.classroomRoute() {
                         val tempSet = classroom.studentList
                         tempSet.add(incomingStudentModel)
                         classRoomStudents.updateOne(
-                            ClassRoomStudents::classID eq cid,
-                            setValue(ClassRoomStudents::studentList, tempSet)
+                                ClassRoomStudents::classID eq cid,
+                                setValue(ClassRoomStudents::studentList, tempSet)
                         )
                     }
                     call.respond(HttpStatusCode.OK)
@@ -122,27 +122,32 @@ fun Route.classroomRoute() {
     }
 
 
+    route("/getClassStudents")
+    {
+        get {
+            try {
+                call.respond(HttpStatusCode.OK, classRoomStudents.find().toList())
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
 
-//    authenticate {
-        route("/getClassStudents")
-        {
-            get {
-                try {
-                    call.respond(HttpStatusCode.OK, classRoomStudents.find().toList())
-                } catch (e: Exception) {
-                    call.respond(HttpStatusCode.BadRequest)
-                    return@get
-                }
+        }
+    }
 
+    route("/deleteClassroom{classid}")
+    {
+        get {
+            try {
+                val classID = call.parameters["classid"]
+                classRoomCollection.findOneAndDelete(Classroom::classroomuid eq classID)
+                classRoomStudents.findOneAndDelete(ClassRoomStudents::classID eq classID)
+            }catch (e:Exception)
+            {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
             }
         }
-//    }
+    }
 }
-//    route("/regStudentToClass")
-//    {
-//        get {
-//            val x = call.receive<StudentModel>()
-//            classRoomStudents.insertOne()
-//        }
-//    }
 
