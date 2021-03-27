@@ -1,4 +1,6 @@
 package com.dettoapp.data
 
-data class ClassRoomStudents(val classID: String, val studentList: List<StudentModel> = ArrayList())
+import org.bson.codecs.pojo.annotations.BsonId
+
+data class ClassRoomStudents(@BsonId val classID: String, val studentList: HashSet<StudentModel> = HashSet())
 

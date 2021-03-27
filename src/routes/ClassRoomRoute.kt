@@ -18,6 +18,7 @@ import org.bson.Document
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
 import org.litote.kmongo.reactivestreams.KMongo
+import org.litote.kmongo.setValue
 
 private val client = KMongo.createClient().coroutine
 private val database = client.getDatabase("UsersDatabase")
@@ -61,8 +62,8 @@ fun Route.classroomRoute() {
             get {
                 try {
                     val uid = call.parameters["uid"]
-                    val classroom= classRoomCollection.findOne(Classroom::classroomuid eq uid)
-                    if(classroom==null)
+                    val classroom = classRoomCollection.findOne(Classroom::classroomuid eq uid)
+                    if (classroom == null)
                         call.respond(HttpStatusCode.BadRequest)
                     else
                         call.respond(classroom)
@@ -78,7 +79,7 @@ fun Route.classroomRoute() {
     {
         get {
             var id = call.parameters["classid"]
-            id="cid/${id}"
+            id = "cid/${id}"
             call.respond(FreeMarkerContent("index.ftl", mapOf("id" to id)))
         }
     }
@@ -91,7 +92,49 @@ fun Route.classroomRoute() {
         }
     }
 
+    route("/regStudentToClassroom/{cid}") {
+        post {
+            try {
+                val cid = call.parameters["cid"]
+                val classroom = classRoomStudents.findOne(ClassRoomStudents::classID eq cid)
+                val incomingStudentModel = call.receive<StudentModel>()
+                if (classroom == null) {
+                    val set = HashSet<StudentModel>()
+                    set.add(incomingStudentModel)
+                    val classroomStudents = ClassRoomStudents(cid!!, set)
+                    classRoomStudents.insertOne(classroomStudents)
+                } else {
+                    val tempSet = classroom.studentList
+                    tempSet.add(incomingStudentModel)
+                    classRoomStudents.updateOne(
+                        ClassRoomStudents::classID eq cid,
+                        setValue(ClassRoomStudents::studentList, tempSet)
+                    )
+                }
+                call.respond(HttpStatusCode.OK)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, "" + e.localizedMessage)
+                return@post
+            }
+        }
 
+
+    }
+    authenticate {
+        route("/getClassStudents")
+        {
+            get {
+                try {
+                    call.respond(HttpStatusCode.OK, classRoomStudents.find().toList())
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest)
+                    return@get
+                }
+
+            }
+        }
+    }
+}
 //    route("/regStudentToClass")
 //    {
 //        get {
@@ -99,4 +142,4 @@ fun Route.classroomRoute() {
 //            classRoomStudents.insertOne()
 //        }
 //    }
-}
+
