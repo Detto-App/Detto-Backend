@@ -24,7 +24,6 @@ private val client = KMongo.createClient().coroutine
 private val database = client.getDatabase("UsersDatabase")
 val classRoomCollection = database.getCollection<Classroom>()
 val classRoomStudents = database.getCollection<ClassRoomStudents>()
-val studentModel= database.getCollection<StudentModel>()
 
 
 fun Route.classroomRoute() {
@@ -42,6 +41,7 @@ fun Route.classroomRoute() {
 
                 }
             }
+
         }
     }
 
@@ -114,11 +114,19 @@ fun Route.classroomRoute() {
                         )
                     }
 
+                    val getStudentModel= students.findOne(StudentModel::uid eq incomingStudentModel.uid)
+                    if(getStudentModel!=null)
+                    {
+                        val tempSet = getStudentModel!!.classrooms
+                        tempSet.add(cid!!)
+                        students.updateOne(StudentModel::uid eq incomingStudentModel.uid, setValue(StudentModel::classrooms,tempSet) )
+                        call.respond(HttpStatusCode.OK)
+                    }
+                    else
+                        call.respond(HttpStatusCode.BadRequest,"Error")
 
-
-                    call.respond(HttpStatusCode.OK)
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.BadRequest, "" + e.localizedMessage)
+                    call.respond(HttpStatusCode.BadRequest, "fff" + e.localizedMessage)
                     return@post
                 }
             }
@@ -136,6 +144,20 @@ fun Route.classroomRoute() {
                 return@get
             }
 
+        }
+    }
+    route("/getclassrooms/{uid}")
+    {
+        get{
+            try{
+                val uid = call.parameters["uid"]
+
+                call.respond(HttpStatusCode.OK, students.find(StudentModel::uid eq uid ).toList())
+            }
+            catch (e:Exception){
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
         }
     }
 
