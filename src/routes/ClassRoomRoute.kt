@@ -153,7 +153,12 @@ fun Route.classroomRoute() {
         get {
             try {
                 val classID = call.parameters["classID"]
-                call.respond(HttpStatusCode.OK, classRoomStudents.find(ClassRoomStudents::classID eq classID).toList())
+                val tempClassStudents= classRoomStudents.findOne(ClassRoomStudents::classID eq classID)
+                if(tempClassStudents!=null)
+                    call.respond(HttpStatusCode.OK,tempClassStudents)
+                else
+                    call.respond(HttpStatusCode.BadRequest)
+
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)
                 return@get
