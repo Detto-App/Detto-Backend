@@ -1,10 +1,7 @@
 package com.dettoapp.routes
 
 import com.dettoapp.auth.JwtConfig
-import com.dettoapp.data.ReceivingUserModel
-import com.dettoapp.data.StudentModel
-import com.dettoapp.data.TeacherModel
-import com.dettoapp.data.Token
+import com.dettoapp.data.*
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.client.engine.callContext
@@ -25,6 +22,7 @@ import org.bson.Document
 import org.eclipse.jetty.http.HttpStatus
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.coroutine.toList
+import org.litote.kmongo.div
 import org.litote.kmongo.eq
 import org.litote.kmongo.inc
 import org.litote.kmongo.reactivestreams.KMongo
@@ -71,9 +69,13 @@ fun Route.registerUser() {
     route("/getTeacherClassrooms/{uid}") {
         get {
             try {
+                val uid = call.parameters["uid"]
+                val list = classRoomCollection.find( Classroom::teacher / TeacherModel::email eq uid).toList()
+                call.respond(list)
+
 
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest)
+                call.respond(HttpStatusCode.BadRequest,""+e.localizedMessage)
                 return@get
             }
         }
@@ -84,6 +86,7 @@ fun Route.registerUser() {
         get {
             students.deleteMany(Document())
             call.respond(HttpStatusCode.OK)
+
         }
     }
 
