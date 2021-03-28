@@ -18,12 +18,7 @@ import io.ktor.http.*
 import io.ktor.gson.*
 import io.ktor.features.*
 import io.ktor.freemarker.FreeMarker
-import io.ktor.freemarker.FreeMarkerContent
 import io.ktor.request.ContentTransformationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlin.random.Random
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -31,12 +26,6 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
 
-
-//    CoroutineScope(Dispatchers.IO).launch{
-//        classRoomCollection.drop()
-//        students.drop()
-//        classRoomStudents.drop()
-//    }
 
     install(DefaultHeaders)
     install(CallLogging)
@@ -54,7 +43,7 @@ fun Application.module(testing: Boolean = false) {
             realm = Constants.ISSUER
 
             validate {
-                UserIdPrincipal( it.payload.getClaim("id").asString())
+                UserIdPrincipal(it.payload.getClaim("id").asString())
             }
         }
     }
@@ -109,10 +98,19 @@ fun Application.module(testing: Boolean = false) {
             route("/sec")
             {
                 get {
-                    call.respond(HttpStatusCode.OK,"Hello")
+                    call.respond(HttpStatusCode.OK, "Hello")
                 }
             }
 
+        }
+
+        route("/deleteDb")
+        {
+            get {
+                classRoomCollection.drop()
+                studentsCollection.drop()
+                classRoomStudentsCollection.drop()
+            }
         }
     }
 }
