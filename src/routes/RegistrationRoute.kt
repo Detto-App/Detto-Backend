@@ -68,6 +68,16 @@ fun Route.registerUser() {
             }
         }
     }
+    route("/getTeacherClassrooms/{uid}") {
+        get {
+            try {
+
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+        }
+    }
 
     route("/deleteAllStudents")
     {
