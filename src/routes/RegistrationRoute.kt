@@ -68,14 +68,12 @@ fun Route.registerUser() {
             }
         }
     }
-    route("/getTeacherClassrooms/{uid}") {
+    route("/getTeacherClassrooms/{temail}") {
         get {
             try {
-                val uid = call.parameters["uid"]
-                val list = classRoomCollection.find( Classroom::teacher / TeacherModel::email eq uid).toList()
+                val tEmail = call.parameters["temail"]
+                val list = classRoomCollection.find( Classroom::teacher / TeacherModel::email eq tEmail).toList()
                 call.respond(list)
-
-
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest,""+e.localizedMessage)
                 return@get
@@ -153,17 +151,21 @@ fun Route.registerUser() {
         route("/getStudentClassroom/{semail}")
         {
             get {
-                var sEmail = call.parameters["semail"]
-                val classrooms = (students.findOne(StudentModel::email eq sEmail))!!.classrooms
-                val list = ArrayList<Classroom>()
-                for (element in classrooms) {
-                    val temp = classRoomCollection.findOne(Classroom::classroomuid eq element)
-                    if (temp != null)
-                        list.add(temp)
+                try {
+                    val sEmail = call.parameters["semail"]
+                    val classrooms = (students.findOne(StudentModel::email eq sEmail))!!.classrooms
+                    val list = ArrayList<Classroom>()
+                    for (element in classrooms) {
+                        val temp = classRoomCollection.findOne(Classroom::classroomuid eq element)
+                        if (temp != null)
+                            list.add(temp)
+                    }
+                    call.respond(HttpStatusCode.OK, list)
+                }catch (e:Exception)
+                {
+                    call.respond(HttpStatusCode.BadRequest)
+                    return@get
                 }
-                call.respond(HttpStatusCode.OK, list)
-//            id = "cid/${id}"
-//            call.respond(FreeMarkerContent("index.ftl", mapOf("id" to id)))
             }
         }
     }
