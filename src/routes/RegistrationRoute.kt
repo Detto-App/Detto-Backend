@@ -1,14 +1,13 @@
 package com.dettoapp.routes
 
 import com.dettoapp.auth.JwtConfig
-import com.dettoapp.data.ReceivingUserModel
-import com.dettoapp.data.StudentModel
-import com.dettoapp.data.TeacherModel
-import com.dettoapp.data.Token
+import com.dettoapp.data.*
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
+import io.ktor.auth.*
 import io.ktor.client.engine.callContext
 import io.ktor.features.ContentTransformationException
+import io.ktor.freemarker.*
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
 import io.ktor.response.respond
@@ -134,7 +133,28 @@ fun Route.registerUser() {
             }
         }
     }
+    authenticate {
+        route("/getStudentClassroom/{semail}")
+        {
+            get {
+                var sEmail = call.parameters["semail"]
+                val classrooms = (students.findOne(StudentModel::email eq sEmail))!!.classrooms
+                val list = ArrayList<Classroom>()
+                for (element in classrooms) {
+                    val temp = classRoomCollection.findOne(Classroom::classroomuid eq element)
+                    if (temp != null)
+                        list.add(temp)
+                }
+                call.respond(HttpStatusCode.OK, list)
+//            id = "cid/${id}"
+//            call.respond(FreeMarkerContent("index.ftl", mapOf("id" to id)))
+            }
+        }
+    }
+
 }
+
+
 
 //val compute = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
 //private suspend fun ApplicationCall.getTeacherDetails()

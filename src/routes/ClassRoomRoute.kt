@@ -26,7 +26,6 @@ private val database = client.getDatabase("UsersDatabase")
 val classRoomCollection = database.getCollection<Classroom>()
 val classRoomStudents = database.getCollection<ClassRoomStudents>()
 
-
 fun Route.classroomRoute() {
 
     authenticate {
@@ -110,21 +109,22 @@ fun Route.classroomRoute() {
                         val tempSet = classroom.studentList
                         tempSet.add(incomingStudentModel)
                         classRoomStudents.updateOne(
-                                ClassRoomStudents::classID eq cid,
-                                setValue(ClassRoomStudents::studentList, tempSet)
+                            ClassRoomStudents::classID eq cid,
+                            setValue(ClassRoomStudents::studentList, tempSet)
                         )
                     }
 
-                    val getStudentModel= students.findOne(StudentModel::uid eq incomingStudentModel.uid)
-                    if(getStudentModel!=null)
-                    {
+                    val getStudentModel = students.findOne(StudentModel::uid eq incomingStudentModel.uid)
+                    if (getStudentModel != null) {
                         val tempSet = getStudentModel!!.classrooms
                         tempSet.add(cid!!)
-                        students.updateOne(StudentModel::uid eq incomingStudentModel.uid, setValue(StudentModel::classrooms,tempSet) )
+                        students.updateOne(
+                            StudentModel::uid eq incomingStudentModel.uid,
+                            setValue(StudentModel::classrooms, tempSet)
+                        )
                         call.respond(HttpStatusCode.OK)
-                    }
-                    else
-                        call.respond(HttpStatusCode.BadRequest,"Error")
+                    } else
+                        call.respond(HttpStatusCode.BadRequest, "Error")
 
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest, "fff" + e.localizedMessage)
@@ -149,13 +149,12 @@ fun Route.classroomRoute() {
     }
     route("/getclassrooms/{uid}")
     {
-        get{
-            try{
+        get {
+            try {
                 val uid = call.parameters["uid"]
 
-                call.respond(HttpStatusCode.OK, students.find(StudentModel::uid eq uid ).toList())
-            }
-            catch (e:Exception){
+                call.respond(HttpStatusCode.OK, students.find(StudentModel::uid eq uid).toList())
+            } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)
                 return@get
             }
@@ -177,7 +176,7 @@ fun Route.classroomRoute() {
                 }
             }
         }
-    }
 
+    }
 }
 
