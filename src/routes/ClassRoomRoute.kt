@@ -135,11 +135,25 @@ fun Route.classroomRoute() {
     }
 
 
-    route("/getClassStudents")
+    route("/getAllClassStudents")
     {
         get {
             try {
                 call.respond(HttpStatusCode.OK, classRoomStudents.find().toList())
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+
+        }
+    }
+
+    route("/getClassStudents/{classID}")
+    {
+        get {
+            try {
+                val classID = call.parameters["classID"]
+                call.respond(HttpStatusCode.OK, classRoomStudents.find(ClassRoomStudents::classID eq classID).toList())
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)
                 return@get
@@ -152,7 +166,6 @@ fun Route.classroomRoute() {
         get {
             try {
                 val uid = call.parameters["uid"]
-
                 call.respond(HttpStatusCode.OK, students.find(StudentModel::uid eq uid).toList())
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)
@@ -176,7 +189,6 @@ fun Route.classroomRoute() {
                 }
             }
         }
-
     }
 }
 
