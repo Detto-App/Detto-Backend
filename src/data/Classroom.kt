@@ -7,5 +7,6 @@ data class Classroom(
     val sem: String,
     val section: String,
     @BsonId val classroomuid: String,
-    val teacher: TeacherModel
+    val teacher: TeacherModel,
+    val settingsModel: ClassroomSettingsModel
     )
