@@ -28,6 +28,8 @@ fun Route.classroomRoute() {
                 try {
                     val incomingClassRoomData = call.receive<Classroom>()
                     classRoomCollection.insertOne(incomingClassRoomData)
+                    val classroomStudents=ClassRoomStudents(incomingClassRoomData.classroomuid)
+                    classRoomStudentsCollection.insertOne(classroomStudents)
                     call.respond(HttpStatusCode.OK)
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest)
