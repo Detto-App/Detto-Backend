@@ -8,5 +8,6 @@ data class StudentModel(
     @BsonId val email: String,
     val uid: String,
     val susn: String,
-    val classrooms :HashSet<String> = HashSet()
+    val classrooms :HashSet<String> = HashSet(),
+    val projects:HashSet<String> = HashSet()
 )
