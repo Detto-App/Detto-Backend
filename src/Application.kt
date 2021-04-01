@@ -56,6 +56,7 @@ fun Application.module(testing: Boolean = false) {
     {
         registerUser()
         classroomRoute()
+        projectRoute()
     }
 
     routing {
