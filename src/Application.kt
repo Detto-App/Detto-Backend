@@ -2,6 +2,7 @@ package com.dettoapp
 
 import com.dettoapp.Utility.Constants
 import com.dettoapp.auth.JwtConfig
+import com.dettoapp.data.Connection
 import com.dettoapp.data.StudentModel
 import com.dettoapp.data.User
 import com.dettoapp.routes.*
@@ -18,7 +19,15 @@ import io.ktor.http.*
 import io.ktor.gson.*
 import io.ktor.features.*
 import io.ktor.freemarker.FreeMarker
+import io.ktor.http.cio.websocket.Frame
+import io.ktor.http.cio.websocket.WebSocketSession
+import io.ktor.http.cio.websocket.readText
 import io.ktor.request.ContentTransformationException
+import io.ktor.websocket.DefaultWebSocketServerSession
+import io.ktor.websocket.WebSockets
+import io.ktor.websocket.webSocket
+import java.util.*
+import kotlin.collections.LinkedHashSet
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -29,6 +38,7 @@ fun Application.module(testing: Boolean = false) {
 
     install(DefaultHeaders)
     install(CallLogging)
+    install(WebSockets)
     install(ContentNegotiation) {
         gson {
             setPrettyPrinting()
@@ -57,6 +67,7 @@ fun Application.module(testing: Boolean = false) {
         registerUser()
         classroomRoute()
         projectRoute()
+        chat()
     }
 
     routing {
@@ -113,6 +124,15 @@ fun Application.module(testing: Boolean = false) {
                 classRoomStudentsCollection.drop()
             }
         }
+
     }
+
+}
+
+//private fun WebSocketSession.send(frame: String) {
+//
+//}
+suspend fun WebSocketSession.sendText(frame: String) {
+    this.send(Frame.Text(frame))
 }
 
