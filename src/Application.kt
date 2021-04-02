@@ -2,32 +2,32 @@ package com.dettoapp
 
 import com.dettoapp.Utility.Constants
 import com.dettoapp.auth.JwtConfig
-import com.dettoapp.data.Connection
 import com.dettoapp.data.StudentModel
 import com.dettoapp.data.User
 import com.dettoapp.routes.*
 import freemarker.cache.ClassTemplateLoader
-import io.ktor.application.*
+import io.ktor.application.Application
+import io.ktor.application.call
+import io.ktor.application.install
 import io.ktor.auth.Authentication
 import io.ktor.auth.UserIdPrincipal
 import io.ktor.auth.authenticate
 import io.ktor.auth.jwt.jwt
-import io.ktor.response.*
-import io.ktor.request.*
-import io.ktor.routing.*
-import io.ktor.http.*
-import io.ktor.gson.*
-import io.ktor.features.*
+import io.ktor.features.CallLogging
+import io.ktor.features.ContentNegotiation
+import io.ktor.features.DefaultHeaders
 import io.ktor.freemarker.FreeMarker
+import io.ktor.gson.gson
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.WebSocketSession
-import io.ktor.http.cio.websocket.readText
 import io.ktor.request.ContentTransformationException
-import io.ktor.websocket.DefaultWebSocketServerSession
+import io.ktor.request.receive
+import io.ktor.response.respond
+import io.ktor.response.respondText
+import io.ktor.routing.*
 import io.ktor.websocket.WebSockets
-import io.ktor.websocket.webSocket
-import java.util.*
-import kotlin.collections.LinkedHashSet
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -120,8 +120,10 @@ fun Application.module(testing: Boolean = false) {
         {
             get {
                 classRoomCollection.drop()
-                studentsCollection.drop()
                 classRoomStudentsCollection.drop()
+                teachersCollection.drop()
+                studentsCollection.drop()
+                projectCollection.drop()
             }
         }
 
@@ -129,9 +131,6 @@ fun Application.module(testing: Boolean = false) {
 
 }
 
-//private fun WebSocketSession.send(frame: String) {
-//
-//}
 suspend fun WebSocketSession.sendText(frame: String) {
     this.send(Frame.Text(frame))
 }

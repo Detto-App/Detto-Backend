@@ -13,6 +13,7 @@ import kotlin.collections.LinkedHashSet
 
 
 val connectionsHashMap = HashMap<String, MutableSet<Connection?>>()
+val list = arrayListOf<String>("Apple", "Mongo", "IDK")
 fun Route.chat() {
 
     route("/chat/{id}")
@@ -35,13 +36,20 @@ fun Route.chat() {
                 connections += thisConnection
                 println("Connects Count " + connections.size)
 
+                list.forEach { data ->
+                    thisConnection.session.sendText(data)
+                }
+
                 sendText("You are connected! There are ${connections.count()} users here.")
                 for (frame in incoming) {
                     frame as? Frame.Text ?: continue
                     val receivedText = frame.readText()
                     val textWithUsername = "[${thisConnection.name}]: $receivedText"
+                    list.add(textWithUsername)
                     connections.forEach {
-                        it?.session?.sendText(textWithUsername)
+                        if (it != thisConnection) {
+                            it?.session?.sendText(textWithUsername)
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -49,6 +57,7 @@ fun Route.chat() {
             } finally {
                 println("Removing $thisConnection!")
                 connections -= thisConnection
+                println("Connects Count " + connections.size)
             }
         }
     }
