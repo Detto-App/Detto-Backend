@@ -40,11 +40,26 @@ fun Route.projectRoute() {
         get{
             try {
                 //val incomeProject = call.receive<ProjectModel>()
-
                 call.respond(HttpStatusCode.OK,projectCollection.find().toList())
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)
                 return@get
+            }
+        }
+    }
+
+    authenticate {
+        route("/getProjects/{cid}")
+        {
+            get {
+                try {
+                    val classID = call.parameters["cid"]
+                    val projectList = projectCollection.find(ProjectModel::cid eq classID).toList()
+                    call.respond(HttpStatusCode.OK, projectList)
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest)
+                    return@get
+                }
             }
         }
     }
