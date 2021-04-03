@@ -35,8 +35,65 @@ fun Route.projectRoute() {
             }
         }
 
-    }
 
+
+
+        route("/getProjectDetails/{pid}")
+        {
+            get {
+                try {
+                    val pid = call.parameters["pid"]
+                    val project = projectCollection.findOne(ProjectModel::pid eq pid)
+                    if (project != null) {
+                        call.respond(HttpStatusCode.OK, project)
+
+                    } else {
+                        call.respond(HttpStatusCode.BadRequest)
+                    }
+
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest)
+                    return@get
+                }
+            }
+        }
+        route("/regStudentToProject/{pid}/{name}")
+        {
+            post {
+                try {
+                    val pid = call.parameters["pid"]
+                    val sName = call.parameters["name"]
+                    val projectModel = projectCollection.findOne(ProjectModel::pid eq pid)
+                    if (projectModel != null) {
+                        projectModel.studentNameList.add(sName!!)
+                        projectCollection.updateOne(ProjectModel::pid eq pid, projectModel)
+                        call.respond(HttpStatusCode.OK)
+                    } else {
+                        call.respond(HttpStatusCode.BadRequest)
+                    }
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest)
+                    return@post
+                }
+            }
+        }
+
+
+
+        route("/getProjects/{cid}")
+        {
+            get {
+                try {
+                    val classID = call.parameters["cid"]
+                    val projectList = projectCollection.find(ProjectModel::cid eq classID).toList()
+                    call.respond(HttpStatusCode.OK, projectList)
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest)
+                    return@get
+                }
+            }
+        }
+    }
     route("/getp")
     {
         get {
@@ -46,45 +103,6 @@ fun Route.projectRoute() {
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)
                 return@get
-            }
-        }
-    }
-    route("/getProjectDetails/{pid}")
-    {
-        get {
-            try {
-                val pid = call.parameters["pid"]
-                val project = projectCollection.findOne(ProjectModel::pid eq pid)
-                if (project != null) {
-                    call.respond(HttpStatusCode.OK, project)
-
-                } else {
-                    call.respond(HttpStatusCode.BadRequest)
-                }
-
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest)
-                return@get
-            }
-        }
-    }
-    route("/regStudentToProject/{pid}/{name}")
-    {
-        post {
-            try {
-                val pid = call.parameters["pid"]
-                val sName = call.parameters["name"]
-                val projectModel = projectCollection.findOne(ProjectModel::pid eq pid)
-                if (projectModel != null) {
-                    projectModel.studentNameList.add(sName!!)
-                    projectCollection.updateOne(ProjectModel::pid eq pid, projectModel)
-                    call.respond(HttpStatusCode.OK)
-                } else {
-                    call.respond(HttpStatusCode.BadRequest)
-                }
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest)
-                return@post
             }
         }
     }
