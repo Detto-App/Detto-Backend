@@ -124,6 +124,7 @@ fun Application.module(testing: Boolean = false) {
                 teachersCollection.drop()
                 studentsCollection.drop()
                 projectCollection.drop()
+                call.respond(HttpStatusCode.OK)
             }
         }
 
