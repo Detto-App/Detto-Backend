@@ -35,9 +35,6 @@ fun Route.projectRoute() {
             }
         }
 
-
-
-
         route("/getProjectDetails/{pid}")
         {
             get {
@@ -46,7 +43,6 @@ fun Route.projectRoute() {
                     val project = projectCollection.findOne(ProjectModel::pid eq pid)
                     if (project != null) {
                         call.respond(HttpStatusCode.OK, project)
-
                     } else {
                         call.respond(HttpStatusCode.BadRequest)
                     }
@@ -57,16 +53,18 @@ fun Route.projectRoute() {
                 }
             }
         }
-        route("/regStudentToProject/{pid}/{name}")
+        route("/regStudentToProject/{pid}/{name}/{susn}")
         {
             post {
                 try {
                     val pid = call.parameters["pid"]
                     val sName = call.parameters["name"]
+                    val susn = call.parameters["susn"]
                     val projectModel = projectCollection.findOne(ProjectModel::pid eq pid)
                     if (projectModel != null) {
                         projectModel.studentNameList.add(sName!!)
                         projectCollection.updateOne(ProjectModel::pid eq pid, projectModel)
+                        studentsCollection.updateOne(StudentModel::susn eq susn, addToSet(StudentModel::projects, pid))
                         call.respond(HttpStatusCode.OK)
                     } else {
                         call.respond(HttpStatusCode.BadRequest)
