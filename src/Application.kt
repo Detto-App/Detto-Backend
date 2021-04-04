@@ -28,6 +28,8 @@ import io.ktor.response.respond
 import io.ktor.response.respondText
 import io.ktor.routing.*
 import io.ktor.websocket.WebSockets
+import java.util.*
+
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -130,9 +132,32 @@ fun Application.module(testing: Boolean = false) {
 
     }
 
+//    CoroutineScope(Dispatchers.IO).launch {
+//        val queue = CircularQueue<String>()
+//
+//        queue.add("a")
+//        queue.add("b")
+//        queue.add("c")
+//        queue.add("d")
+//        queue.add("e")
+//        queue.add("f")
+//
+//    }
+
 }
 
 suspend fun WebSocketSession.sendText(frame: String) {
     this.send(Frame.Text(frame))
 }
+
+fun<E> Queue<E>.print()
+{
+    val x = PriorityQueue<E>(this)
+    while (!x.isEmpty())
+    {
+        println(x.peek())
+        x.remove()
+    }
+}
+
 
