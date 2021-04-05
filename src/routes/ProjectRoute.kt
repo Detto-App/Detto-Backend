@@ -14,6 +14,7 @@ import io.ktor.routing.post
 import io.ktor.routing.route
 import org.litote.kmongo.addToSet
 import org.litote.kmongo.eq
+import org.litote.kmongo.setValue
 
 
 fun Route.projectRoute() {
@@ -76,8 +77,6 @@ fun Route.projectRoute() {
             }
         }
 
-
-
         route("/getProjects/{cid}")
         {
             get {
@@ -101,6 +100,29 @@ fun Route.projectRoute() {
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)
                 return@get
+            }
+        }
+    }
+
+    authenticate {
+        route("/changeStatus/{pid}/{status}")
+        {
+            get {
+                try {
+                    val pid = call.parameters["pid"]
+                    val status = call.parameters["status"]
+                    val obj = projectCollection.findOneAndUpdate(
+                        ProjectModel::pid eq pid,
+                        setValue(ProjectModel::status, status)
+                    )
+                    if (obj != null) {
+                        call.respond(HttpStatusCode.OK)
+                    } else call.respond(HttpStatusCode.BadRequest, "" + obj)
+
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest)
+                    return@get
+                }
             }
         }
     }
