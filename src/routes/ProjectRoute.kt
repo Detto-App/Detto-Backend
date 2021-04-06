@@ -127,4 +127,21 @@ fun Route.projectRoute() {
         }
     }
 
+    authenticate {
+        route("/getManyProjectDetails") {
+            post {
+                try {
+                    val listOfProjects = call.receive<HashSet<String>>()
+                    val listOfProjectDetails = ArrayList<ProjectModel>()
+                    for (i in listOfProjects) {
+                        listOfProjectDetails.add(projectCollection.findOne(ProjectModel::pid eq i)!!)
+                    }
+                    call.respond(HttpStatusCode.OK, message = listOfProjectDetails)
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest, "" + e.localizedMessage)
+                    return@post
+                }
+            }
+        }
+    }
 }
