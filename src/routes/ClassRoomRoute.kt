@@ -13,6 +13,11 @@ import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
+import jdk.nashorn.internal.objects.Global
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import org.bson.Document
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
@@ -28,7 +33,7 @@ fun Route.classroomRoute() {
                 try {
                     val incomingClassRoomData = call.receive<Classroom>()
                     classRoomCollection.insertOne(incomingClassRoomData)
-                    val classroomStudents=ClassRoomStudents(incomingClassRoomData.classroomuid)
+                    val classroomStudents = ClassRoomStudents(incomingClassRoomData.classroomuid)
                     classRoomStudentsCollection.insertOne(classroomStudents)
                     call.respond(HttpStatusCode.OK)
                 } catch (e: Exception) {
@@ -107,7 +112,8 @@ fun Route.classroomRoute() {
                 try {
                     val classID = call.parameters["classid"]
                     classRoomCollection.findOneAndDelete(Classroom::classroomuid eq classID)
-                    classRoomStudentsCollection.findOneAndDelete(ClassRoomStudents::classID eq classID)
+                    val classRoomStudents = classRoomStudentsCollection.findOneAndDelete(ClassRoomStudents::classID eq classID)
+                    deleteClassIdInStudents(classRoomStudents)
                     call.respond(HttpStatusCode.OK)
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest, "" + e.localizedMessage)
@@ -182,3 +188,22 @@ fun Route.classroomRoute() {
     }
 }
 
+private fun deleteClassIdInStudents(classRoomStudents: ClassRoomStudents?) {
+    if (classRoomStudents != null) {
+        GlobalScope.launch(Dispatchers.IO) {
+            for (student in classRoomStudents.studentList) {
+                launch {
+                    deleteClassId(classRoomStudents.classID, student.uid)
+                }
+            }
+        }
+    }
+}
+
+private suspend fun deleteClassId(classId: String, studentId: String) {
+    val studentModel = studentsCollection.findOne(StudentModel::uid eq studentId)
+    studentModel?.let {
+        it.classrooms.remove(classId)
+        studentsCollection.updateOne(StudentModel::uid eq studentId, studentModel)
+    }
+}
