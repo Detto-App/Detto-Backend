@@ -10,7 +10,7 @@ data class ProjectModel(
     val studentList: HashSet<String> =HashSet(),
     val tid:String,
     val cid:String,
-    val status:String,
+    var status:String,
     val studentNameList:ArrayList<String> = ArrayList()
 )
 
