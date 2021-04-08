@@ -144,4 +144,20 @@ fun Route.projectRoute() {
             }
         }
     }
+
+    authenticate {
+        route("/updateProject/{pid}") {
+            post {
+                try {
+                    val projectModel = call.receive<ProjectModel>()
+                    val pid = call.parameters["pid"]
+                    projectCollection.updateOne(ProjectModel::pid eq pid, projectModel)
+                    call.respond(HttpStatusCode.OK)
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest, "" + e.localizedMessage)
+                    return@post
+                }
+            }
+        }
+    }
 }
