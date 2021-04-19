@@ -1,8 +1,11 @@
-package com.dettoapp.routes
+package com.dettoapp.routes.Classroom
 
 import com.dettoapp.data.ClassRoomStudents
 import com.dettoapp.data.Classroom
 import com.dettoapp.data.StudentModel
+import com.dettoapp.routes.classRoomCollection
+import com.dettoapp.routes.classRoomStudentsCollection
+import com.dettoapp.routes.studentsCollection
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.freemarker.FreeMarkerContent
@@ -13,15 +16,11 @@ import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
-import jdk.nashorn.internal.objects.Global
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.bson.Document
-import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
-import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.setValue
 
 

@@ -5,6 +5,8 @@ import com.dettoapp.auth.JwtConfig
 import com.dettoapp.data.StudentModel
 import com.dettoapp.data.User
 import com.dettoapp.routes.*
+import com.dettoapp.routes.Classroom.deadlineRoute
+import com.dettoapp.routes.Classroom.classroomRoute
 import freemarker.cache.ClassTemplateLoader
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -70,6 +72,7 @@ fun Application.module(testing: Boolean = false) {
         classroomRoute()
         projectRoute()
         chat()
+        deadlineRoute()
     }
 
     routing {

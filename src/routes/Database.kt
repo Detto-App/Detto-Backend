@@ -14,6 +14,7 @@ val teachersCollection = database.getCollection<TeacherModel>()
 val studentsCollection = database.getCollection<StudentModel>("students")
 val projectCollection= database.getCollection<ProjectModel>()
 val chatMessageCollection = database.getCollection<ChatMessages>()
+val deadlineManagementCollection= database.getCollection<DeadlineManagementModel>()
 
 
 
