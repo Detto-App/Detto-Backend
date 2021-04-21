@@ -1,8 +1,11 @@
-package com.dettoapp.routes
+package com.dettoapp.routes.Classroom
 
 import com.dettoapp.data.ClassRoomStudents
 import com.dettoapp.data.Classroom
 import com.dettoapp.data.StudentModel
+import com.dettoapp.routes.classRoomCollection
+import com.dettoapp.routes.classRoomStudentsCollection
+import com.dettoapp.routes.studentsCollection
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.freemarker.FreeMarkerContent
