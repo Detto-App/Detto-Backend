@@ -1,10 +1,11 @@
 package com.dettoapp.routes
 
-import com.dettoapp.data.Chat
 import com.dettoapp.data.ChatMessages
+import com.dettoapp.data.ChatGroup
 import com.dettoapp.data.CircularList
 import com.dettoapp.data.Connection
 import com.dettoapp.sendText
+import com.google.gson.Gson
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.cio.websocket.Frame
@@ -26,8 +27,8 @@ import kotlin.collections.HashMap
 import kotlin.collections.LinkedHashSet
 
 val connectionsHashMap = HashMap<String, MutableSet<Connection?>>()
-val chatMessagesHashMap = HashMap<String, CircularList<Chat>>()
-
+val chatMessagesHashMap = HashMap<String, CircularList<ChatMessages>>()
+private val gson = Gson()
 fun Route.chat() {
 
     route("/deleteChat")
@@ -56,15 +57,15 @@ fun Route.chat() {
         webSocket {
             val id = call.parameters["id"]!!
             val connections: MutableSet<Connection?>
-            val chatMessages: CircularList<Chat>
+            val chatMessagesMessages: CircularList<ChatMessages>
             val thisConnection = Connection(this)
 
             connections = getConnection(id)
-            chatMessages = getChatMessageList(id)
+            chatMessagesMessages = getChatMessageList(id)
 
             try {
                 connections += thisConnection
-                chatMessages.forEach { data ->
+                chatMessagesMessages.forEach { data ->
                     sendText(data.message)
                 }
 
@@ -72,7 +73,14 @@ fun Route.chat() {
                 for (frame in incoming) {
                     frame as? Frame.Text ?: continue
                     val receivedText = frame.readText()
-                    storeAndUpdateChatMessage(id, receivedText, chatMessages)
+                    val chatmessage: ChatMessages
+                    try {
+                        chatmessage = gson.fromJson(receivedText, ChatMessages::class.java)
+                    } catch (e: Exception) {
+                        continue
+                    }
+
+                    storeAndUpdateChatMessage(id, chatmessage, chatMessagesMessages)
                     connections.forEach {
                         if (it != thisConnection) {
                             it?.session?.sendText(receivedText)
@@ -85,7 +93,7 @@ fun Route.chat() {
                 connections -= thisConnection
                 if (connections.size == 0) {
                     CoroutineScope(Dispatchers.IO).launch {
-                        chatMessageCollection.updateOne(ChatMessages::pid eq id, setValue(ChatMessages::messages, chatMessages))
+                        chatMessageCollection.updateOne(ChatGroup::pid eq id, setValue(ChatGroup::messages, chatMessagesMessages))
                     }
                     chatMessagesHashMap.remove(id)
                     connectionsHashMap.remove(id)
@@ -106,9 +114,9 @@ private fun getConnection(id: String): MutableSet<Connection?> {
 }
 
 private suspend fun getChatMessageList(id: String) = if (chatMessagesHashMap[id] == null) {
-    var localChatMessages = chatMessageCollection.findOne(ChatMessages::pid eq id)
+    var localChatMessages = chatMessageCollection.findOne(ChatGroup::pid eq id)
     if (localChatMessages == null) {
-        localChatMessages = ChatMessages(id)
+        localChatMessages = ChatGroup(id)
         chatMessagesHashMap[id] = localChatMessages.messages
         CoroutineScope(Dispatchers.IO).launch {
             chatMessageCollection.insertOne(localChatMessages)
@@ -119,7 +127,7 @@ private suspend fun getChatMessageList(id: String) = if (chatMessagesHashMap[id]
     chatMessagesHashMap[id]!!
 }
 
-private fun storeAndUpdateChatMessage(id: String, message: String, chatMessages: CircularList<Chat>) {
-    chatMessages.add(Chat(DateTimeFormatter.ISO_INSTANT.format(Instant.now()), message))
-    chatMessagesHashMap[id] = chatMessages
+private fun storeAndUpdateChatMessage(id: String, message: ChatMessages, chatMessagesList: CircularList<ChatMessages>) {
+    chatMessagesList.add(message)
+    chatMessagesHashMap[id] = chatMessagesList
 }

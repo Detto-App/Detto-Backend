@@ -13,15 +13,11 @@ import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
-import jdk.nashorn.internal.objects.Global
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.bson.Document
-import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
-import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.setValue
 
 
@@ -203,6 +199,7 @@ private fun deleteClassIdInStudents(classRoomStudents: ClassRoomStudents?) {
 private suspend fun deleteClassId(classId: String, studentId: String) {
     val studentModel = studentsCollection.findOne(StudentModel::uid eq studentId)
     studentModel?.let {
+//        val x  = projectCollection.findOne(ProjectModel::cid eq classId,ProjectModel::studentList contains studentModel.susn)
         it.classrooms.remove(classId)
         studentsCollection.updateOne(StudentModel::uid eq studentId, studentModel)
     }
