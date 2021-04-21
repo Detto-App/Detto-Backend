@@ -83,7 +83,7 @@ fun Route.chat() {
                     storeAndUpdateChatMessage(id, chatmessage, chatMessagesMessages)
                     connections.forEach {
                         if (it != thisConnection) {
-                            it?.session?.sendText(receivedText)
+                            it?.session?.sendText(gson.toJson(chatmessage))
                         }
                     }
                 }
