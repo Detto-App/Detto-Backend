@@ -20,8 +20,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.litote.kmongo.eq
 import org.litote.kmongo.setValue
-import java.time.Instant
-import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.collections.LinkedHashSet
@@ -66,24 +64,24 @@ fun Route.chat() {
             try {
                 connections += thisConnection
                 chatMessagesMessages.forEach { data ->
-                    sendText(data.message)
+                    sendText(gson.toJson(data))
                 }
 
                 sendText("You are connected! There are ${connections.count()} users here.")
                 for (frame in incoming) {
                     frame as? Frame.Text ?: continue
                     val receivedText = frame.readText()
-                    val chatmessage: ChatMessages
+                    val chatMessageLocal: ChatMessages
                     try {
-                        chatmessage = gson.fromJson(receivedText, ChatMessages::class.java)
+                        chatMessageLocal = gson.fromJson(receivedText, ChatMessages::class.java)
                     } catch (e: Exception) {
                         continue
                     }
 
-                    storeAndUpdateChatMessage(id, chatmessage, chatMessagesMessages)
+                    storeAndUpdateChatMessage(id, chatMessageLocal, chatMessagesMessages)
                     connections.forEach {
                         if (it != thisConnection) {
-                            it?.session?.sendText(gson.toJson(chatmessage))
+                            it?.session?.sendText(gson.toJson(chatMessageLocal))
                         }
                     }
                 }
