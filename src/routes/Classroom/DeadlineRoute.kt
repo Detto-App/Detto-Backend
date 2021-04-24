@@ -99,10 +99,14 @@ fun Route.deadlineRoute() {
                     val classID = call.parameters["cid"]
                     val tempClassDeadline =
                         deadlineManagementCollection.findOne(DeadlineManagementModel::cid eq classID)
-                    if (tempClassDeadline != null)
-                        call.respond(HttpStatusCode.OK, tempClassDeadline!!.deadlinesList)
-                    else
+                    if (tempClassDeadline == null)
                         call.respond(HttpStatusCode.OK)
+                    val list=ArrayList<DeadlineModel>()
+                    for((K,V) in tempClassDeadline!!.deadlinesList)
+                        list.add(V)
+
+                    call.respond(HttpStatusCode.OK,list)
+
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest)
                     return@get
