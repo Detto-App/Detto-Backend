@@ -6,6 +6,6 @@ data class DeadlineModel(
     @BsonId
     val did:String,
     val description:String,
-    val fromDate:String,
-    val toDate:String
+    val fromdate:String,
+    val todate:String
 )

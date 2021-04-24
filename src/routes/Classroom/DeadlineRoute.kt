@@ -37,11 +37,11 @@ fun Route.deadlineRoute() {
                         val deadlineManagementModel = DeadlineManagementModel(classID!!, deadlineArray)
                         deadlineManagementCollection.insertOne(deadlineManagementModel)
                     } else {
-                        val deadlineArray = tempClassDeadline.deadlinesList
+                        val deadlineArray = tempClassDeadline.deadlineslist
                         deadlineArray[incomingDeadlinesData.did]=incomingDeadlinesData
                         deadlineManagementCollection.updateOne(
                                 DeadlineManagementModel::cid eq classID,
-                                setValue(DeadlineManagementModel::deadlinesList, deadlineArray)
+                                setValue(DeadlineManagementModel::deadlineslist, deadlineArray)
                         )
 
                     }
@@ -100,9 +100,9 @@ fun Route.deadlineRoute() {
                     val tempClassDeadline =
                         deadlineManagementCollection.findOne(DeadlineManagementModel::cid eq classID)
                     if (tempClassDeadline == null)
-                        call.respond(HttpStatusCode.OK)
+                        call.respond(HttpStatusCode.BadRequest)
                     val list=ArrayList<DeadlineModel>()
-                    for((K,V) in tempClassDeadline!!.deadlinesList)
+                    for((K,V) in tempClassDeadline!!.deadlineslist)
                         list.add(V)
 
                     call.respond(HttpStatusCode.OK,list)
@@ -118,9 +118,9 @@ fun Route.deadlineRoute() {
 private fun deleteDeadlineInDeadlinesMap(deadlineManagementModel: DeadlineManagementModel,did:String,cid:String) {
     if (deadlineManagementModel != null) {
         GlobalScope.launch(Dispatchers.IO) {
-            if (did in deadlineManagementModel.deadlinesList.keys) {
+            if (did in deadlineManagementModel.deadlineslist.keys) {
                 deadlineManagementModel?.let {
-                    it.deadlinesList.remove(did)
+                    it.deadlineslist.remove(did)
                     deadlineManagementCollection.updateOne(DeadlineManagementModel::cid eq cid, deadlineManagementModel)
                 }
             } else {
