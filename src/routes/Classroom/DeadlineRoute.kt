@@ -79,7 +79,7 @@ fun Route.deadlineRoute() {
                 val list = deadlineManagementCollection.find().toList()
                 call.respond(HttpStatusCode.OK, list)
             } catch (e: Exception) {
-                println(e.localizedMessage)
+//                println(e.localizedMessage)
                 call.respond(HttpStatusCode.OK, e.localizedMessage)
             }
         }
@@ -91,17 +91,35 @@ fun Route.deadlineRoute() {
             call.respond(HttpStatusCode.OK)
         }
     }
+
+    authenticate {
+        route("getDeadline/{cid}") {
+            get {
+                try {
+                    val classID = call.parameters["cid"]
+                    val tempClassDeadline =
+                        deadlineManagementCollection.findOne(DeadlineManagementModel::cid eq classID)
+                    if (tempClassDeadline != null)
+                        call.respond(HttpStatusCode.OK, tempClassDeadline!!.deadlinesList)
+                    else
+                        call.respond(HttpStatusCode.OK)
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest)
+                    return@get
+                }
+            }
+        }
+    }
 }
 private fun deleteDeadlineInDeadlinesMap(deadlineManagementModel: DeadlineManagementModel,did:String,cid:String) {
     if (deadlineManagementModel != null) {
         GlobalScope.launch(Dispatchers.IO) {
-            if(did in deadlineManagementModel.deadlinesList.keys){
+            if (did in deadlineManagementModel.deadlinesList.keys) {
                 deadlineManagementModel?.let {
                     it.deadlinesList.remove(did)
-                    deadlineManagementCollection.updateOne(DeadlineManagementModel::cid eq cid,deadlineManagementModel)
+                    deadlineManagementCollection.updateOne(DeadlineManagementModel::cid eq cid, deadlineManagementModel)
                 }
-            }
-            else{
+            } else {
                 throw Exception("InvalidDeadline")
 
             }
