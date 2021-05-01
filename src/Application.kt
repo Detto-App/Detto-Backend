@@ -1,18 +1,36 @@
 package com.dettoapp
 
+import com.dettoapp.Utility.Constants
+import com.dettoapp.auth.JwtConfig
+import com.dettoapp.data.StudentModel
 import com.dettoapp.data.User
-import io.ktor.application.*
-import io.ktor.response.*
-import io.ktor.request.*
-import io.ktor.routing.*
-import io.ktor.http.*
-import io.ktor.gson.*
-import io.ktor.features.*
-import com.fasterxml.jackson.databind.*
-import io.ktor.jackson.*
-import io.ktor.client.*
-import io.ktor.client.engine.jetty.*
+import com.dettoapp.routes.*
+import com.dettoapp.routes.Classroom.classroomRoute
+import com.dettoapp.routes.Classroom.deadlineRoute
+import freemarker.cache.ClassTemplateLoader
+import io.ktor.application.Application
+import io.ktor.application.call
+import io.ktor.application.install
+import io.ktor.auth.Authentication
+import io.ktor.auth.UserIdPrincipal
+import io.ktor.auth.authenticate
+import io.ktor.auth.jwt.jwt
+import io.ktor.features.CallLogging
+import io.ktor.features.ContentNegotiation
+import io.ktor.features.DefaultHeaders
+import io.ktor.freemarker.FreeMarker
+import io.ktor.gson.gson
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.cio.websocket.Frame
+import io.ktor.http.cio.websocket.WebSocketSession
 import io.ktor.request.ContentTransformationException
+import io.ktor.request.receive
+import io.ktor.response.respond
+import io.ktor.response.respondText
+import io.ktor.routing.*
+import io.ktor.websocket.WebSockets
+import java.util.*
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -20,16 +38,48 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
 
-    val list2:ArrayList<User> = ArrayList()
+
+    install(DefaultHeaders)
+    install(CallLogging)
+    install(WebSockets)
     install(ContentNegotiation) {
         gson {
             setPrettyPrinting()
+            serializeNulls()
         }
     }
 
+    install(Authentication)
+    {
+        jwt {
+            verifier(JwtConfig.verifier)
+            realm = Constants.ISSUER
+
+            validate {
+                UserIdPrincipal(it.payload.getClaim("id").asString())
+            }
+        }
+    }
+
+    install(FreeMarker) {
+        templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
+    }
+
+    install(Routing)
+    {
+        registerUser()
+        classroomRoute()
+        projectRoute()
+        chat()
+        deadlineRoute()
+        gDrive()
+    }
+
+    repeatFetchGDriveToken()
+
     routing {
         get("/") {
-            call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
+            call.respondText("HELLO WORLD!", contentType = ContentType.Text.Html)
         }
 
         get("/json/gson") {
@@ -45,19 +95,86 @@ fun Application.module(testing: Boolean = false) {
             val users = try {
                 call.receive<User>()
                 //call.respond("Done")
-            }catch (e:ContentTransformationException)
-            {
+            } catch (e: ContentTransformationException) {
                 call.respond(HttpStatusCode.BadGateway)
                 return@post
             }
-            list2.add(users)
             call.respond(HttpStatusCode.OK)
         }
 
         get("/data")
         {
-            call.respond(HttpStatusCode.OK,list2)
+            call.respond(HttpStatusCode.OK, "empty")
         }
+
+        post("/login") {
+            val credentials = call.receive<StudentModel>()
+            val token = JwtConfig.makeToken(credentials)
+            call.respondText(token)
+        }
+
+        authenticate {
+            route("/sec")
+            {
+                get {
+                    call.respond(HttpStatusCode.OK, "Hello")
+                }
+            }
+
+        }
+
+        route("/deleteDb")
+        {
+            get {
+                classRoomCollection.drop()
+                classRoomStudentsCollection.drop()
+                teachersCollection.drop()
+                studentsCollection.drop()
+                projectCollection.drop()
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
+    }
+
+//    CoroutineScope(Dispatchers.IO).launch {
+//
+//
+////        val refreshTokenCredential =
+////            GoogleCredential.Builder().setJsonFactory(JacksonFactory.getDefaultInstance()).setTransport(GoogleNetHttpTransport.newTrustedTransport())
+////                .setClientSecrets(clientID, clientSecret).build().setRefreshToken(refreshToken)
+////        refreshTokenCredential.refreshToken() //do not forget to call this
+////
+////        val newAccessToken = refreshTokenCredential.accessToken
+////
+////        println("Hello " + newAccessToken)
+//
+////        val x = GoogleA
+////        val queue = CircularQueue<String>()
+////
+////        queue.add("a")
+////        queue.add("b")
+////        queue.add("c")
+////        queue.add("d")
+////        queue.add("e")
+////        queue.add("f")
+//
+//    }
+
+}
+
+suspend fun WebSocketSession.sendText(frame: String) {
+    this.send(Frame.Text(frame))
+}
+
+fun <E> Queue<E>.print()
+{
+    val x = PriorityQueue<E>(this)
+    while (!x.isEmpty())
+    {
+        println(x.peek())
+        x.remove()
     }
 }
+
 
