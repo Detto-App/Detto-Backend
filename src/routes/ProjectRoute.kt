@@ -12,6 +12,7 @@ import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
+import org.bson.Document
 import org.litote.kmongo.addToSet
 import org.litote.kmongo.eq
 import org.litote.kmongo.setValue
@@ -64,6 +65,7 @@ fun Route.projectRoute() {
                     val projectModel = projectCollection.findOne(ProjectModel::pid eq pid)
                     if (projectModel != null) {
                         projectModel.studentNameList.add(sName!!)
+                        projectModel.studentList.add(susn!!)
                         projectCollection.updateOne(ProjectModel::pid eq pid, projectModel)
                         studentsCollection.updateOne(StudentModel::susn eq susn, addToSet(StudentModel::projects, pid))
                         call.respond(HttpStatusCode.OK)
@@ -97,6 +99,20 @@ fun Route.projectRoute() {
             try {
                 val list = projectCollection.find().toList()
                 call.respond(HttpStatusCode.OK, list)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+        }
+    }
+
+
+    route("/deleteProjects")
+    {
+        get {
+            try {
+                projectCollection.deleteMany(Document())
+                call.respond(HttpStatusCode.OK)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)
                 return@get
