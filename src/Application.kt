@@ -74,6 +74,7 @@ fun Application.module(testing: Boolean = false) {
         chat()
         deadlineRoute()
         gDrive()
+        todoRoute()
     }
 
     repeatFetchGDriveToken()
