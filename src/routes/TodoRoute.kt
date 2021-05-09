@@ -1,7 +1,5 @@
 package com.dettoapp.routes
 
-import com.dettoapp.data.DeadlineManagementModel
-import com.dettoapp.data.DeadlineModel
 import com.dettoapp.data.TodoManagementModel
 import com.dettoapp.detto.Models.Todo
 import io.ktor.application.*
@@ -63,6 +61,28 @@ fun Route.todoRoute() {
         get {
             todoManagementCollection.deleteMany(Document())
             call.respond(HttpStatusCode.OK)
+        }
+    }
+    authenticate {
+        route("/getTodo/{cid}") {
+            get {
+                try {
+                    val classID = call.parameters["cid"]
+                    val tempClassTodo =
+                        todoManagementCollection.findOne(TodoManagementModel::cid eq classID)
+                    if (tempClassTodo == null)
+                        call.respond(HttpStatusCode.BadRequest)
+                    val list=ArrayList<Todo>()
+                    for((K,V) in tempClassTodo!!.todolist)
+                        list.add(V)
+
+                    call.respond(HttpStatusCode.OK,list)
+
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest)
+                    return@get
+                }
+            }
         }
     }
 }

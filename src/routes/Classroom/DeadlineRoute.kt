@@ -92,7 +92,7 @@ fun Route.deadlineRoute() {
         }
     }
 
-    authenticate {
+//    authenticate {
         route("getDeadline/{cid}") {
             get {
                 try {
@@ -112,7 +112,7 @@ fun Route.deadlineRoute() {
                     return@get
                 }
             }
-        }
+//        }
     }
 }
 private fun deleteDeadlineInDeadlinesMap(deadlineManagementModel: DeadlineManagementModel,did:String,cid:String) {
