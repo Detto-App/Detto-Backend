@@ -14,12 +14,12 @@ import org.litote.kmongo.setValue
 
 fun Route.todoRoute() {
     authenticate {
-        route("/createTodo/{cid}") {
+        route("/createTodo/{pid}") {
             post {
                 try {
-                    val classID = call.parameters["cid"]
+                    val classID = call.parameters["pid"]
                     val tempClassTodo =
-                        todoManagementCollection.findOne(TodoManagementModel::cid eq classID)
+                        todoManagementCollection.findOne(TodoManagementModel::pid eq classID)
                     val incomingTodoData = call.receive<Todo>()
                     if (tempClassTodo == null) {
                         val todoArray = HashMap<String, Todo>()
@@ -30,7 +30,7 @@ fun Route.todoRoute() {
                         val todoArray = tempClassTodo.todolist
                         todoArray[incomingTodoData.toid] = incomingTodoData
                         todoManagementCollection.updateOne(
-                            TodoManagementModel::cid eq classID,
+                            TodoManagementModel::pid eq classID,
                             setValue(TodoManagementModel::todolist, todoArray)
                         )
 
@@ -64,12 +64,12 @@ fun Route.todoRoute() {
         }
     }
     authenticate {
-        route("/getTodo/{cid}") {
+        route("/getTodo/{pid}") {
             get {
                 try {
-                    val classID = call.parameters["cid"]
+                    val classID = call.parameters["pid"]
                     val tempClassTodo =
-                        todoManagementCollection.findOne(TodoManagementModel::cid eq classID)
+                        todoManagementCollection.findOne(TodoManagementModel::pid eq classID)
                     if (tempClassTodo == null)
                         call.respond(HttpStatusCode.BadRequest)
                     val list=ArrayList<Todo>()
