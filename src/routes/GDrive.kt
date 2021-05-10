@@ -26,8 +26,14 @@ private var refreshTokenCredential: GoogleCredential? = null
 
 
 fun Route.gDrive() {
-    route("/gDrive")
+    route("/gDriveToken")
     {
+        get {
+            gDriveAccessToken?.let {
+                call.respond(HttpStatusCode.OK, it)
+            } ?: call.respond(HttpStatusCode.BadRequest)
+        }
+
         post {
             try {
                 val model = call.receive<GDriveModel>()
@@ -46,16 +52,6 @@ fun Route.gDrive() {
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)
             }
-        }
-    }
-
-    route("/gDriveToken")
-    {
-        get {
-            if (gDriveAccessToken == null)
-                call.respond(HttpStatusCode.BadRequest)
-            else
-                call.respond(HttpStatusCode.OK, gDriveAccessToken!!)
         }
     }
 }
