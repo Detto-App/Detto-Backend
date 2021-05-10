@@ -7,6 +7,7 @@ import com.dettoapp.data.User
 import com.dettoapp.routes.*
 import com.dettoapp.routes.Classroom.classroomRoute
 import com.dettoapp.routes.Classroom.deadlineRoute
+import com.sun.mail.auth.OAuth2SaslClientFactory
 import freemarker.cache.ClassTemplateLoader
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -30,8 +31,14 @@ import io.ktor.response.respond
 import io.ktor.response.respondText
 import io.ktor.routing.*
 import io.ktor.websocket.WebSockets
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.simplejavamail.api.mailer.config.TransportStrategy
+import org.simplejavamail.config.ConfigLoader
+import org.simplejavamail.email.EmailBuilder
+import org.simplejavamail.mailer.MailerBuilder
 import java.util.*
-import kotlin.collections.ArrayList
+
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -75,6 +82,7 @@ fun Application.module(testing: Boolean = false) {
         deadlineRoute()
         gDrive()
         todoRoute()
+        reportRoute()
     }
 
     repeatFetchGDriveToken()
@@ -122,7 +130,6 @@ fun Application.module(testing: Boolean = false) {
                     call.respond(HttpStatusCode.OK, "Hello")
                 }
             }
-
         }
 
         route("/deleteDb")
@@ -137,7 +144,38 @@ fun Application.module(testing: Boolean = false) {
             }
         }
 
+        routing {
+            get("/email") {
+                val email = EmailBuilder.startingBlank()
+                        .from("DettoApp", "dettoapp@gmail.com")
+                        .to("vikas", "vvisa1234@gmail.com")
+                        .withSubject("Welcome!")
+                        .withPlainText("Welcome to DettoApp Vikas Bhai!!!")
+                        .buildEmail()
+
+                MailerBuilder
+                        .withSMTPServer("smtp.gmail.com", 465, "dettoapp@gmail.com", "VLvbLwrQ7>-)qz(h")
+                        .withTransportStrategy(TransportStrategy.SMTPS)
+                        .buildMailer()
+                        .sendMail(email)
+
+                call.respond(HttpStatusCode.OK)
+            }
+        }
     }
+}
+
+suspend fun WebSocketSession.sendText(frame: String) {
+    this.send(Frame.Text(frame))
+}
+
+fun <E> Queue<E>.print() {
+    val x = PriorityQueue<E>(this)
+    while (!x.isEmpty()) {
+        println(x.peek())
+        x.remove()
+    }
+}
 
 //    CoroutineScope(Dispatchers.IO).launch {
 //
@@ -163,20 +201,11 @@ fun Application.module(testing: Boolean = false) {
 //
 //    }
 
-}
-
-suspend fun WebSocketSession.sendText(frame: String) {
-    this.send(Frame.Text(frame))
-}
-
-fun <E> Queue<E>.print()
-{
-    val x = PriorityQueue<E>(this)
-    while (!x.isEmpty())
-    {
-        println(x.peek())
-        x.remove()
-    }
-}
+//GlobalScope.launch {
+//
+//}
+//
+////        ConfigLoader.loadProperties(Properties(),  /* addProperties = */false)
+//ConfigLoader.loadProperties(Properties(), true)
 
 

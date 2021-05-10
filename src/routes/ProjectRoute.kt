@@ -66,6 +66,11 @@ fun Route.projectRoute() {
                     if (projectModel != null) {
                         projectModel.studentNameList.add(sName!!)
                         projectModel.studentList.add(susn!!)
+
+                        //Do not Use kotlin style for inserting into to HashMap,
+                        // Kotlin way does not work
+                        projectModel.projectStudentList.put(susn, sName)
+
                         projectCollection.updateOne(ProjectModel::pid eq pid, projectModel)
                         studentsCollection.updateOne(StudentModel::susn eq susn, addToSet(StudentModel::projects, pid))
                         call.respond(HttpStatusCode.OK)
@@ -128,8 +133,8 @@ fun Route.projectRoute() {
                     val pid = call.parameters["pid"]
                     val status = call.parameters["status"]
                     val obj = projectCollection.findOneAndUpdate(
-                        ProjectModel::pid eq pid,
-                        setValue(ProjectModel::status, status)
+                            ProjectModel::pid eq pid,
+                            setValue(ProjectModel::status, status)
                     )
                     if (obj != null) {
                         call.respond(HttpStatusCode.OK)
