@@ -6,6 +6,6 @@ data class Todo(
     @BsonId val toid:String,
     val tittle:String,
     val category:String,
-    val assignedTo:String,
+    val assigned_to:String,
     val status:String
 )

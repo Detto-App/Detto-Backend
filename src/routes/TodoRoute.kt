@@ -13,7 +13,7 @@ import org.litote.kmongo.eq
 import org.litote.kmongo.setValue
 
 fun Route.todoRoute() {
-    authenticate {
+//    authenticate {
         route("/createTodo/{pid}") {
             post {
                 try {
@@ -43,7 +43,7 @@ fun Route.todoRoute() {
                 }
             }
 
-        }
+//        }
     }
     route("/todos") {
         get {
