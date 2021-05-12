@@ -8,6 +8,9 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.bson.Document
 import org.litote.kmongo.eq
 import org.litote.kmongo.setValue
@@ -64,6 +67,22 @@ fun Route.todoRoute() {
         }
     }
     authenticate {
+        route("/deleteTodo/{pid}/{toid}") {
+            get {
+                try {
+                    val pid = call.parameters["pid"]
+                    val toid = call.parameters["toid"]
+                    val Todomap = todoManagementCollection.findOne(TodoManagementModel::pid eq pid)
+                    deleteTodoInTodoMap(Todomap!!, toid!!, pid!!)
+                    call.respond(HttpStatusCode.OK)
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest)
+                    return@get
+                }
+            }
+        }
+    }
+    authenticate {
         route("/getTodo/{pid}") {
             get {
                 try {
@@ -82,6 +101,22 @@ fun Route.todoRoute() {
                     call.respond(HttpStatusCode.BadRequest)
                     return@get
                 }
+            }
+        }
+    }
+}
+
+private fun deleteTodoInTodoMap(todoManagementModel: TodoManagementModel, toid:String, pid:String) {
+    if (todoManagementModel != null) {
+        GlobalScope.launch(Dispatchers.IO) {
+            if (toid in todoManagementModel.todolist.keys) {
+                todoManagementModel?.let {
+                    it.todolist.remove(toid)
+                    todoManagementCollection.updateOne(TodoManagementModel::pid eq pid, todoManagementModel)
+                }
+            } else {
+                throw Exception("Invalid Todo")
+
             }
         }
     }
