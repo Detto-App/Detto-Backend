@@ -7,5 +7,5 @@ data class Todo(
     val tittle:String,
     val category:String,
     val assigned_to:String,
-    val status:String
+    var status:Int
 )

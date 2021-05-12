@@ -104,6 +104,26 @@ fun Route.todoRoute() {
             }
         }
     }
+
+    authenticate {
+        route("/changeStatusOfTodo/{toid}/{pid}")
+        {
+            get {
+                try {
+                    val toid = call.parameters["toid"]
+                    val pid = call.parameters["pid"]
+                    val obj = todoManagementCollection.findOne(
+                        TodoManagementModel::pid eq pid
+                    )
+                    changestatusoftodo(obj!!,toid!!,pid!!)
+                    call.respond(HttpStatusCode.OK)
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest,e.localizedMessage)
+                    return@get
+                }
+            }
+        }
+    }
 }
 
 private fun deleteTodoInTodoMap(todoManagementModel: TodoManagementModel, toid:String, pid:String) {
@@ -112,6 +132,23 @@ private fun deleteTodoInTodoMap(todoManagementModel: TodoManagementModel, toid:S
             if (toid in todoManagementModel.todolist.keys) {
                 todoManagementModel?.let {
                     it.todolist.remove(toid)
+                    todoManagementCollection.updateOne(TodoManagementModel::pid eq pid, todoManagementModel)
+                }
+            } else {
+                throw Exception("Invalid Todo")
+
+            }
+        }
+    }
+}
+
+private fun changestatusoftodo(todoManagementModel: TodoManagementModel, toid:String, pid:String) {
+    if (todoManagementModel != null) {
+        GlobalScope.launch(Dispatchers.IO) {
+            if (toid in todoManagementModel.todolist.keys) {
+                todoManagementModel?.let {
+                    val temp=it.todolist.get(toid)!!
+                    temp.status=0
                     todoManagementCollection.updateOne(TodoManagementModel::pid eq pid, todoManagementModel)
                 }
             } else {
