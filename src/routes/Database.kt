@@ -16,6 +16,7 @@ val projectCollection = database.getCollection<ProjectModel>()
 val chatMessageCollection = database.getCollection<ChatGroup>()
 val deadlineManagementCollection = database.getCollection<DeadlineManagementModel>()
 val todoManagementCollection = database.getCollection<TodoManagementModel>()
+val rubricsCollection= database.getCollection<RubricsModel>()
 
 
 

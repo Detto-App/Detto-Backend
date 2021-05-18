@@ -75,6 +75,7 @@ fun Application.module(testing: Boolean = false) {
         deadlineRoute()
         gDrive()
         todoRoute()
+        rubricsRoute()
     }
 
     repeatFetchGDriveToken()
