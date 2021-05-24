@@ -184,7 +184,7 @@ fun Route.projectRoute() {
                     val usnList = call.receive<HashSet<String>>()
                     val usnMap = hashMapOf<String, String>()
                     for (k in usnList) {
-                        usnMap[k] = studentsCollection.findOne(StudentModel::susn eq k)!!.susn
+                        usnMap[k] = studentsCollection.findOne(StudentModel::susn eq k)!!.name
                     }
                     call.respond(HttpStatusCode.OK, usnMap)
                 } catch (e: Exception) {
