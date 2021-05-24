@@ -112,6 +112,19 @@ fun Route.rubricsRoute() {
             }
         }
     }
+    route("/getProjectRubrics/{cid}/{pid}")
+    {
+        get {
+            try {
+                val pid = call.parameters["pid"]
+                val projectRubricsList=projectRubricsCollection.find(ProjectRubricsModel::pid eq pid).toList()
+                call.respond(HttpStatusCode.OK,projectRubricsList)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+        }
+    }
 
 
     route("/updateProjectRubrics/{cid}/{pid}")
