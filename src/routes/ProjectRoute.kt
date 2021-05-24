@@ -176,4 +176,22 @@ fun Route.projectRoute() {
             }
         }
     }
+
+    authenticate {
+        route("getStudentNameList") {
+            get {
+                try {
+                    val usnList = call.receive<HashSet<String>>()
+                    val usnMap = hashMapOf<String, String>()
+                    for (k in usnList) {
+                        usnMap[k] = studentsCollection.findOne(StudentModel::susn eq k)!!.susn
+                    }
+                    call.respond(HttpStatusCode.OK, usnMap)
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest, "" + e.localizedMessage)
+                    return@get
+                }
+            }
+        }
+    }
 }
