@@ -179,7 +179,7 @@ fun Route.projectRoute() {
 
     authenticate {
         route("getStudentNameList") {
-            get {
+            post {
                 try {
                     val usnList = call.receive<HashSet<String>>()
                     val usnMap = hashMapOf<String, String>()
@@ -189,7 +189,7 @@ fun Route.projectRoute() {
                     call.respond(HttpStatusCode.OK, usnMap)
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest, "" + e.localizedMessage)
-                    return@get
+                    return@post
                 }
             }
         }
