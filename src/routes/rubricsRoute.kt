@@ -77,7 +77,7 @@ fun Route.rubricsRoute() {
     {
         post {
             try {
-                val incomingModel = call.safeReceive<ArrayList<ProjectRubricsModel>>()
+                val incomingModel = call.receive<ArrayList<ProjectRubricsModel>>()
                 projectRubricsCollection.insertMany(incomingModel)
                 call.respond(HttpStatusCode.OK)
             } catch (e: Exception) {
