@@ -189,9 +189,9 @@ fun Route.projectRoute() {
                     val projectModelList: ArrayList<ProjectModel> = Gson().fromJson(json, object : TypeToken<ArrayList<ProjectModel>?>() {}.getType())
                         projectModelList.forEach{projectCollection.insertOne(it)}
 
-                    for(i in (0..projectModelList.size)-1) {
+                    for(i in 0 until projectModelList.size) {
                         val studentusnList= ArrayList<String>(projectModelList[i].studentList)
-                        for (j in (0..studentusnList.size)-1) {
+                        for (j in 0 until studentusnList.size) {
                             studentsCollection.updateOne(StudentModel::susn eq studentusnList[j], addToSet(StudentModel::projects, projectModelList[i].pid))
                         }
                     }
