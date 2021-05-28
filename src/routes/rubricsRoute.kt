@@ -132,15 +132,10 @@ fun Route.rubricsRoute() {
         post {
             try {
                 val incomingModel = call.receive<HashMap<String,RubricsModel>>()
-                val cid = call.parameters["cid"]
                 val pid = call.parameters["pid"]
                 for(i in incomingModel.keys){
-
                     projectRubricsCollection.updateOne(and(ProjectRubricsModel::usn eq i,ProjectRubricsModel::pid eq pid ), setValue(ProjectRubricsModel::rubrics,incomingModel[i]))
-
                 }
-
-
                 call.respond(HttpStatusCode.OK)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)

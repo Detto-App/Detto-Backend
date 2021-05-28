@@ -1,8 +1,11 @@
 package com.dettoapp.routes
 
 //import com.mongodb.client.model.Accumulators.addToSet
+
 import com.dettoapp.data.ProjectModel
 import com.dettoapp.data.StudentModel
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.http.HttpStatusCode
@@ -16,6 +19,7 @@ import org.bson.Document
 import org.litote.kmongo.addToSet
 import org.litote.kmongo.eq
 import org.litote.kmongo.setValue
+import java.util.*
 
 
 fun Route.projectRoute() {
@@ -176,6 +180,29 @@ fun Route.projectRoute() {
             }
         }
     }
+        route("/createProjects/{cid}"){
+            post {
+                try {
+                    val projectModelLis = call.receive<ArrayList<ProjectModel>>()
+//                    for(i in projectModelList)
+                    val json = Gson().toJson(projectModelLis)
+                    val projectModelList: ArrayList<ProjectModel> = Gson().fromJson(json, object : TypeToken<ArrayList<ProjectModel>?>() {}.getType())
+                        projectModelList.forEach{projectCollection.insertOne(it)}
+
+                    for(i in (0..projectModelList.size)-1) {
+                        val studentusnList= ArrayList<String>(projectModelList[i].studentList)
+                        for (j in (0..studentusnList.size)-1) {
+                            studentsCollection.updateOne(StudentModel::susn eq studentusnList[j], addToSet(StudentModel::projects, projectModelList[i].pid))
+                        }
+                    }
+                    call.respond(HttpStatusCode.OK)
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest, "" + e.localizedMessage)
+                    return@post
+                }
+            }
+        }
+
 
     authenticate {
         route("getStudentNameList") {
