@@ -1,9 +1,12 @@
 package com.dettoapp.routes
 
+import com.dettoapp.data.EmailDetailsModel
 import com.dettoapp.data.GDriveModel
+import com.dettoapp.data.ProjectModel
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.gson.Gson
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
@@ -12,11 +15,14 @@ import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.io.FileWriter
 import java.lang.Exception
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.concurrent.schedule
 
 private val timer = Timer()
@@ -25,7 +31,7 @@ private var gDriveAccessToken: String? = null
 private var refreshTokenCredential: GoogleCredential? = null
 
 
-fun Route.gDrive() {
+fun Route.initializeData() {
     route("/gDriveToken")
     {
         get {
@@ -53,6 +59,29 @@ fun Route.gDrive() {
                 call.respond(HttpStatusCode.BadRequest)
             }
         }
+    }
+
+    route("/initializeEmail")
+    {
+        post {
+            try {
+                val listOfEmail = call.receive<ArrayList<EmailDetailsModel>>()
+                storeEmailInformation(listOfEmail)
+                call.respond(HttpStatusCode.OK)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest)
+            }
+        }
+    }
+}
+
+@Suppress("BlockingMethodInNonBlockingContext")
+fun storeEmailInformation(list : ArrayList<EmailDetailsModel>)
+{
+    CoroutineScope(Dispatchers.IO).launch{
+        val fileWriter = FileWriter("emailHelper.json",false)
+        fileWriter.write(Gson().toJson(list))
+        fileWriter.flush()
     }
 }
 
