@@ -68,9 +68,9 @@ fun Route.projectRoute() {
                     val susn = call.parameters["susn"]
                     val projectModel = projectCollection.findOne(ProjectModel::pid eq pid)
                     if (projectModel != null) {
-                        projectModel.studentNameList.add(sName!!)
-                        projectModel.studentList.add(susn!!)
-                        projectCollection.updateOne(ProjectModel::pid eq pid, projectModel)
+//                        projectModel.studentNameList.add(sName!!)
+//                        projectModel.studentList.add(susn!!)
+//                        projectCollection.updateOne(ProjectModel::pid eq pid, projectModel)
                         studentsCollection.updateOne(StudentModel::susn eq susn, addToSet(StudentModel::projects, pid))
                         call.respond(HttpStatusCode.OK)
                     } else {
@@ -117,6 +117,21 @@ fun Route.projectRoute() {
             try {
                 projectCollection.deleteMany(Document())
                 call.respond(HttpStatusCode.OK)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+        }
+    }
+    route("/getStudentModel/{susn}")
+    {
+        get {
+            try {
+                val susn = call.parameters["susn"]
+                val studentModel = studentsCollection.findOne(StudentModel::susn eq susn)
+                if (studentModel != null) {
+                    call.respond(HttpStatusCode.OK)
+                } else call.respond(HttpStatusCode.BadRequest, "" + studentModel)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)
                 return@get
