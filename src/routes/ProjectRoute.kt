@@ -130,8 +130,8 @@ fun Route.projectRoute() {
                 val susn = call.parameters["susn"]
                 val studentModel = studentsCollection.findOne(StudentModel::susn eq susn)
                 if (studentModel != null) {
-                    call.respond(HttpStatusCode.OK)
-                } else call.respond(HttpStatusCode.BadRequest, "" + studentModel)
+                    call.respond(HttpStatusCode.OK,studentModel)
+                } else call.respond(HttpStatusCode.BadRequest)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)
                 return@get
