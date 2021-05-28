@@ -1,8 +1,11 @@
 package com.dettoapp.routes
 
 //import com.mongodb.client.model.Accumulators.addToSet
+
 import com.dettoapp.data.ProjectModel
 import com.dettoapp.data.StudentModel
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.http.HttpStatusCode
@@ -16,6 +19,7 @@ import org.bson.Document
 import org.litote.kmongo.addToSet
 import org.litote.kmongo.eq
 import org.litote.kmongo.setValue
+import java.util.*
 
 
 fun Route.projectRoute() {
@@ -64,14 +68,20 @@ fun Route.projectRoute() {
                     val susn = call.parameters["susn"]
                     val projectModel = projectCollection.findOne(ProjectModel::pid eq pid)
                     if (projectModel != null) {
-                        projectModel.studentNameList.add(sName!!)
-                        projectModel.studentList.add(susn!!)
+
+                        //projectModel.studentNameList.add(sName!!)
+                        //projectModel.studentList.add(susn!!)
 
                         //Do not Use kotlin style for inserting into to HashMap,
                         // Kotlin way does not work
-                        projectModel.projectStudentList.put(susn, sName)
+                        //projectModel.projectStudentList.put(susn, sName)
 
-                        projectCollection.updateOne(ProjectModel::pid eq pid, projectModel)
+                        //projectCollection.updateOne(ProjectModel::pid eq pid, projectModel)
+
+//                        projectModel.studentNameList.add(sName!!)
+//                        projectModel.studentList.add(susn!!)
+//                        projectCollection.updateOne(ProjectModel::pid eq pid, projectModel)
+
                         studentsCollection.updateOne(StudentModel::susn eq susn, addToSet(StudentModel::projects, pid))
                         call.respond(HttpStatusCode.OK)
                     } else {
@@ -118,6 +128,21 @@ fun Route.projectRoute() {
             try {
                 projectCollection.deleteMany(Document())
                 call.respond(HttpStatusCode.OK)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+        }
+    }
+    route("/getStudentModel/{susn}")
+    {
+        get {
+            try {
+                val susn = call.parameters["susn"]
+                val studentModel = studentsCollection.findOne(StudentModel::susn eq susn)
+                if (studentModel != null) {
+                    call.respond(HttpStatusCode.OK,studentModel)
+                } else call.respond(HttpStatusCode.BadRequest)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)
                 return@get
@@ -174,6 +199,47 @@ fun Route.projectRoute() {
                     val pid = call.parameters["pid"]
                     projectCollection.updateOne(ProjectModel::pid eq pid, projectModel)
                     call.respond(HttpStatusCode.OK)
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest, "" + e.localizedMessage)
+                    return@post
+                }
+            }
+        }
+    }
+        route("/createProjects/{cid}"){
+            post {
+                try {
+                    val projectModelLis = call.receive<ArrayList<ProjectModel>>()
+//                    for(i in projectModelList)
+                    val json = Gson().toJson(projectModelLis)
+                    val projectModelList: ArrayList<ProjectModel> = Gson().fromJson(json, object : TypeToken<ArrayList<ProjectModel>?>() {}.getType())
+                        projectModelList.forEach{projectCollection.insertOne(it)}
+
+                    for(i in 0 until projectModelList.size) {
+                        val studentusnList= ArrayList<String>(projectModelList[i].studentList)
+                        for (j in 0 until studentusnList.size) {
+                            studentsCollection.updateOne(StudentModel::susn eq studentusnList[j], addToSet(StudentModel::projects, projectModelList[i].pid))
+                        }
+                    }
+                    call.respond(HttpStatusCode.OK)
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest, "" + e.localizedMessage)
+                    return@post
+                }
+            }
+        }
+
+
+    authenticate {
+        route("getStudentNameList") {
+            post {
+                try {
+                    val usnList = call.receive<HashSet<String>>()
+                    val usnMap = hashMapOf<String, String>()
+                    for (k in usnList) {
+                        usnMap[k] = studentsCollection.findOne(StudentModel::susn eq k)!!.name
+                    }
+                    call.respond(HttpStatusCode.OK, usnMap)
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest, "" + e.localizedMessage)
                     return@post

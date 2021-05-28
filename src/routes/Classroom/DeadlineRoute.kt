@@ -62,8 +62,6 @@ fun Route.deadlineRoute() {
                     val deadlinesMap=deadlineManagementCollection.findOne(DeadlineManagementModel::cid eq classID)
                     deleteDeadlineInDeadlinesMap(deadlinesMap!!,did!!,classID!!)
                     call.respond(HttpStatusCode.OK)
-
-
                 }
                 catch(e:Exception){
                     call.respond(HttpStatusCode.BadRequest)

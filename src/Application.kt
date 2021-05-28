@@ -76,6 +76,7 @@ fun Application.module(testing: Boolean = false) {
         initializeData()
         todoRoute()
         reportRoute()
+        rubricsRoute()
     }
 
     repeatFetchGDriveToken()
