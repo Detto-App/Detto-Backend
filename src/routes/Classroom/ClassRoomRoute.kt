@@ -49,7 +49,7 @@ fun Route.classroomRoute() {
                 val tid = call.parameters["tid"]
 
 //                val classroomStudents = ClassRoomStudents(incomingClassRoomData.classroomuid)
-                teachersCollection.updateOne(TeacherModel::uid eq tid, addToSet(TeacherModel::accessModelList, incomingData))
+                teachersCollection.updateOne(TeacherModel::uid eq tid, addToSet(TeacherModel::accessmodelist, incomingData))
                 call.respond(HttpStatusCode.OK)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)

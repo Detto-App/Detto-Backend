@@ -91,8 +91,7 @@ fun Route.projectRoute() {
                          *  Kotlin way does not work
                          */
                         projectModel.projectStudentList.put(susn!!, sName!!)
-
-                        //projectCollection.updateOne(ProjectModel::pid eq pid, projectModel)
+                        projectCollection.updateOne(ProjectModel::pid eq pid, projectModel)
 
 //                        projectModel.studentNameList.add(sName!!)
 //                        projectModel.studentList.add(susn!!)
