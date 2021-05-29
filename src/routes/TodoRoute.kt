@@ -1,5 +1,7 @@
 package com.dettoapp.routes
 
+import com.dettoapp.data.Timeline
+import com.dettoapp.data.TimelineManagementModel
 import com.dettoapp.data.TodoManagementModel
 import com.dettoapp.detto.Models.Todo
 import io.ktor.application.*
@@ -14,9 +16,14 @@ import kotlinx.coroutines.launch
 import org.bson.Document
 import org.litote.kmongo.eq
 import org.litote.kmongo.setValue
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 fun Route.todoRoute() {
-//    authenticate {
+    authenticate {
         route("/createTodo/{pid}") {
             post {
                 try {
@@ -36,8 +43,25 @@ fun Route.todoRoute() {
                             TodoManagementModel::pid eq classID,
                             setValue(TodoManagementModel::todolist, todoArray)
                         )
-
                     }
+
+
+                    val currentDateTime = LocalDateTime.now()
+                    val timeline = Timeline(
+                        UUID.randomUUID().toString(),
+                        incomingTodoData.tittle,
+                        incomingTodoData.assigned_to,
+                        currentDateTime.format(DateTimeFormatter.ISO_DATE),
+                        "0"
+                    )
+
+                    val timelineArray = ArrayList<Timeline>()
+                    timelineArray.add(timeline)
+                    timelineManagementCollection.updateOne(
+                        TimelineManagementModel::pid eq classID,
+                        setValue(TimelineManagementModel::timelinelist, timelineArray)
+                    )
+
                     call.respond(HttpStatusCode.OK)
 
                 } catch (e: Exception) {
@@ -46,7 +70,31 @@ fun Route.todoRoute() {
                 }
             }
 
-//        }
+        }
+    }
+    route("/timeline") {
+        get {
+            try {
+                val list = timelineManagementCollection.find().toList()
+                call.respond(HttpStatusCode.OK, list)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.OK, e.localizedMessage)
+            }
+        }
+    }
+    authenticate {
+        route("/getTimeline/{pid}") {
+            get {
+                try {
+                    val pid = call.parameters["pid"]
+                    val res = timelineManagementCollection.findOne(TimelineManagementModel::pid eq pid)!!.timelinelist
+                    call.respond(HttpStatusCode.OK, res)
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.BadRequest)
+                    return@get
+                }
+            }
+        }
     }
     route("/todos") {
         get {
@@ -91,11 +139,11 @@ fun Route.todoRoute() {
                         todoManagementCollection.findOne(TodoManagementModel::pid eq classID)
                     if (tempClassTodo == null)
                         call.respond(HttpStatusCode.BadRequest)
-                    val list=ArrayList<Todo>()
-                    for((K,V) in tempClassTodo!!.todolist)
+                    val list = ArrayList<Todo>()
+                    for ((K, V) in tempClassTodo!!.todolist)
                         list.add(V)
 
-                    call.respond(HttpStatusCode.OK,list)
+                    call.respond(HttpStatusCode.OK, list)
 
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest)
@@ -115,10 +163,10 @@ fun Route.todoRoute() {
                     val obj = todoManagementCollection.findOne(
                         TodoManagementModel::pid eq pid
                     )
-                    changestatusoftodo(obj!!,toid!!,pid!!)
+                    changestatusoftodo(obj!!, toid!!, pid!!)
                     call.respond(HttpStatusCode.OK)
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.BadRequest,e.localizedMessage)
+                    call.respond(HttpStatusCode.BadRequest, e.localizedMessage)
                     return@get
                 }
             }
@@ -126,7 +174,7 @@ fun Route.todoRoute() {
     }
 }
 
-private fun deleteTodoInTodoMap(todoManagementModel: TodoManagementModel, toid:String, pid:String) {
+private fun deleteTodoInTodoMap(todoManagementModel: TodoManagementModel, toid: String, pid: String) {
     if (todoManagementModel != null) {
         GlobalScope.launch(Dispatchers.IO) {
             if (toid in todoManagementModel.todolist.keys) {
@@ -142,13 +190,13 @@ private fun deleteTodoInTodoMap(todoManagementModel: TodoManagementModel, toid:S
     }
 }
 
-private fun changestatusoftodo(todoManagementModel: TodoManagementModel, toid:String, pid:String) {
+private fun changestatusoftodo(todoManagementModel: TodoManagementModel, toid: String, pid: String) {
     if (todoManagementModel != null) {
         GlobalScope.launch(Dispatchers.IO) {
             if (toid in todoManagementModel.todolist.keys) {
                 todoManagementModel?.let {
-                    val temp=it.todolist.get(toid)!!
-                    temp.status=0
+                    val temp = it.todolist.get(toid)!!
+                    temp.status = 0
                     todoManagementCollection.updateOne(TodoManagementModel::pid eq pid, todoManagementModel)
                 }
             } else {

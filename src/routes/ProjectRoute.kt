@@ -4,6 +4,8 @@ package com.dettoapp.routes
 
 import com.dettoapp.data.ProjectModel
 import com.dettoapp.data.StudentModel
+import com.dettoapp.data.Timeline
+import com.dettoapp.data.TimelineManagementModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import io.ktor.application.call
@@ -19,6 +21,8 @@ import org.bson.Document
 import org.litote.kmongo.addToSet
 import org.litote.kmongo.eq
 import org.litote.kmongo.setValue
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 
@@ -33,6 +37,15 @@ fun Route.projectRoute() {
                     val susn = call.parameters["susn"]
                     projectCollection.insertOne(incomeProject)
                     studentsCollection.updateOne(StudentModel::susn eq susn, addToSet(StudentModel::projects, incomeProject.pid))
+
+                    val currentDateTime = LocalDateTime.now()
+                    val timeline= Timeline("Project Created",
+                        ""+susn,
+                        currentDateTime.format(DateTimeFormatter.ISO_DATE),
+                        "0")
+                    val timelineArray = ArrayList<Timeline>()
+                    timelineArray.add(timeline)
+                    timelineManagementCollection.insertOne(TimelineManagementModel(incomeProject.pid, timelineArray))
                     call.respond(HttpStatusCode.OK)
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest)

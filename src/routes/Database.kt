@@ -18,6 +18,7 @@ val deadlineManagementCollection = database.getCollection<DeadlineManagementMode
 val todoManagementCollection = database.getCollection<TodoManagementModel>()
 val rubricsCollection= database.getCollection<RubricsModel>()
 val projectRubricsCollection= database.getCollection<ProjectRubricsModel>()
+val timelineManagementCollection = database.getCollection<TimelineManagementModel>()
 
 
 
