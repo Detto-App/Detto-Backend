@@ -39,7 +39,9 @@ fun Route.projectRoute() {
                     studentsCollection.updateOne(StudentModel::susn eq susn, addToSet(StudentModel::projects, incomeProject.pid))
 
                     val currentDateTime = LocalDateTime.now()
-                    val timeline= Timeline("Project Created",
+                    val timeline= Timeline(
+                        UUID.randomUUID().toString(),
+                        "Project Created",
                         ""+susn,
                         currentDateTime.format(DateTimeFormatter.ISO_DATE),
                         "0")
