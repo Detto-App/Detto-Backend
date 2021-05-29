@@ -72,9 +72,10 @@ fun Route.projectRoute() {
                         //projectModel.studentNameList.add(sName!!)
                         //projectModel.studentList.add(susn!!)
 
-                        //Do not Use kotlin style for inserting into to HashMap,
-                        // Kotlin way does not work
-                        //projectModel.projectStudentList.put(susn, sName)
+                        /** Do not Use kotlin style for inserting into to HashMap,
+                         *  Kotlin way does not work
+                         */
+                        projectModel.projectStudentList.put(susn!!, sName!!)
 
                         //projectCollection.updateOne(ProjectModel::pid eq pid, projectModel)
 
@@ -141,7 +142,7 @@ fun Route.projectRoute() {
                 val susn = call.parameters["susn"]
                 val studentModel = studentsCollection.findOne(StudentModel::susn eq susn)
                 if (studentModel != null) {
-                    call.respond(HttpStatusCode.OK,studentModel)
+                    call.respond(HttpStatusCode.OK, studentModel)
                 } else call.respond(HttpStatusCode.BadRequest)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)
@@ -206,28 +207,28 @@ fun Route.projectRoute() {
             }
         }
     }
-        route("/createProjects/{cid}"){
-            post {
-                try {
-                    val projectModelLis = call.receive<ArrayList<ProjectModel>>()
+    route("/createProjects/{cid}") {
+        post {
+            try {
+                val projectModelLis = call.receive<ArrayList<ProjectModel>>()
 //                    for(i in projectModelList)
-                    val json = Gson().toJson(projectModelLis)
-                    val projectModelList: ArrayList<ProjectModel> = Gson().fromJson(json, object : TypeToken<ArrayList<ProjectModel>?>() {}.getType())
-                        projectModelList.forEach{projectCollection.insertOne(it)}
+                val json = Gson().toJson(projectModelLis)
+                val projectModelList: ArrayList<ProjectModel> = Gson().fromJson(json, object : TypeToken<ArrayList<ProjectModel>?>() {}.getType())
+                projectModelList.forEach { projectCollection.insertOne(it) }
 
-                    for(i in 0 until projectModelList.size) {
-                        val studentusnList= ArrayList<String>(projectModelList[i].studentList)
-                        for (j in 0 until studentusnList.size) {
-                            studentsCollection.updateOne(StudentModel::susn eq studentusnList[j], addToSet(StudentModel::projects, projectModelList[i].pid))
-                        }
+                for (i in 0 until projectModelList.size) {
+                    val studentusnList = ArrayList<String>(projectModelList[i].studentList)
+                    for (j in 0 until studentusnList.size) {
+                        studentsCollection.updateOne(StudentModel::susn eq studentusnList[j], addToSet(StudentModel::projects, projectModelList[i].pid))
                     }
-                    call.respond(HttpStatusCode.OK)
-                } catch (e: Exception) {
-                    call.respond(HttpStatusCode.BadRequest, "" + e.localizedMessage)
-                    return@post
                 }
+                call.respond(HttpStatusCode.OK)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, "" + e.localizedMessage)
+                return@post
             }
         }
+    }
 
 
     authenticate {
