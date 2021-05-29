@@ -45,7 +45,7 @@ fun Route.classroomRoute() {
     route("/addAccess/{tid}") {
         post {
             try {
-                val incomingData = call.receive<ArrayList<AccessModel>>()
+                val incomingData = call.receive<AccessModel>()
                 val tid = call.parameters["tid"]
 
 //                val classroomStudents = ClassRoomStudents(incomingClassRoomData.classroomuid)

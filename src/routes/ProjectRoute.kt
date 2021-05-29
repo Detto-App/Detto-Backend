@@ -246,7 +246,7 @@ fun Route.projectRoute() {
 
 
     authenticate {
-        route("getStudentNameList") {
+        route("/getStudentNameList") {
             post {
                 try {
                     val usnList = call.receive<HashSet<String>>()
