@@ -1,13 +1,7 @@
 package com.dettoapp.routes.Classroom
 
-import com.dettoapp.data.ClassRoomStudents
-import com.dettoapp.data.Classroom
-import com.dettoapp.data.ProjectModel
-import com.dettoapp.data.StudentModel
-import com.dettoapp.routes.classRoomCollection
-import com.dettoapp.routes.classRoomStudentsCollection
-import com.dettoapp.routes.projectCollection
-import com.dettoapp.routes.studentsCollection
+import com.dettoapp.data.*
+import com.dettoapp.routes.*
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.freemarker.FreeMarkerContent
@@ -22,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.bson.Document
+import org.litote.kmongo.addToSet
 import org.litote.kmongo.eq
 import org.litote.kmongo.setValue
 
@@ -46,6 +41,23 @@ fun Route.classroomRoute() {
 
         }
     }
+
+    route("/addAccess/{tid}") {
+        post {
+            try {
+                val incomingData = call.receive<ArrayList<AccessModel>>()
+                val tid = call.parameters["tid"]
+
+//                val classroomStudents = ClassRoomStudents(incomingClassRoomData.classroomuid)
+                teachersCollection.updateOne(TeacherModel::uid eq tid, addToSet(TeacherModel::accessModelList, incomingData))
+                call.respond(HttpStatusCode.OK)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@post
+            }
+        }
+    }
+
 
     authenticate {
         route("/getClassroom/{uid}") {
@@ -210,3 +222,4 @@ private suspend fun deleteClassId(classId: String, studentId: String) {
         studentsCollection.updateOne(StudentModel::uid eq studentId, studentModel)
     }
 }
+
