@@ -55,7 +55,7 @@ fun Route.todoRoute() {
                         "0"
                     )
 
-                    val timelineArray = ArrayList<Timeline>()
+                    val timelineArray =timelineManagementCollection.findOne(TimelineManagementModel::pid eq classID)!!.timelinelist
                     timelineArray.add(timeline)
                     timelineManagementCollection.updateOne(
                         TimelineManagementModel::pid eq classID,
@@ -90,7 +90,7 @@ fun Route.todoRoute() {
                     val res = timelineManagementCollection.findOne(TimelineManagementModel::pid eq pid)!!.timelinelist
                     call.respond(HttpStatusCode.OK, res)
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.BadRequest)
+                    call.respond(HttpStatusCode.BadRequest,""+e.localizedMessage)
                     return@get
                 }
             }
