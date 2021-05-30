@@ -47,13 +47,28 @@ fun Route.classroomRoute() {
             try {
                 val incomingData = call.receive<AccessModel>()
                 val tid = call.parameters["tid"]
-
-//                val classroomStudents = ClassRoomStudents(incomingClassRoomData.classroomuid)
                 teachersCollection.updateOne(TeacherModel::uid eq tid, addToSet(TeacherModel::accessmodelist, incomingData))
                 call.respond(HttpStatusCode.OK)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
+            }
+        }
+    }
+    route("/getTeacherModel/{tid}") {
+        get {
+            try {
+                val tid = call.parameters["tid"]
+//                teachersCollection.updateOne(TeacherModel::uid eq tid, addToSet(TeacherModel::accessmodelist, incomingData))
+                val teacherModel= teachersCollection.findOne(TeacherModel::uid eq tid)
+                if(teacherModel!=null)
+                    call.respond(HttpStatusCode.OK,teacherModel)
+                else
+                    call.respond(HttpStatusCode.BadRequest)
+
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
             }
         }
     }
