@@ -17,6 +17,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.bson.Document
 import org.litote.kmongo.addToSet
+import org.litote.kmongo.and
 import org.litote.kmongo.eq
 import org.litote.kmongo.setValue
 
@@ -72,6 +73,30 @@ fun Route.classroomRoute() {
             }
         }
     }
+
+    route("/getAccessClassRooms/{access}/{sem}") {
+        get {
+            try {
+                val access = call.parameters["access"]
+                val sem = call.parameters["sem"]
+               if(access=="HOD") {
+                   val classRoomList = classRoomCollection.find().toList()
+                   call.respond(HttpStatusCode.OK, classRoomList)
+               }
+                else{
+                   val classRoomList= classRoomCollection.find(Classroom::sem eq sem).toList()
+                   call.respond(HttpStatusCode.OK, classRoomList)
+
+               }
+
+
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+        }
+    }
+
 
 
     authenticate {
