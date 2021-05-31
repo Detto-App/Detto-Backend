@@ -67,6 +67,10 @@ fun Route.initializeData() {
             try {
                 val listOfEmail = call.receive<ArrayList<EmailDetailsModel>>()
                 storeEmailInformation(listOfEmail)
+
+                //Do Not Remove this Code it is used to auto initalisze email data
+                mailHelper
+
                 call.respond(HttpStatusCode.OK)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)

@@ -20,6 +20,8 @@ val rubricsCollection= database.getCollection<RubricsModel>()
 val projectRubricsCollection= database.getCollection<ProjectRubricsModel>()
 val timelineManagementCollection = database.getCollection<TimelineManagementModel>()
 
+val submissionCollection = database.getCollection<SubmissionMegaModel>()
+
 
 
 
