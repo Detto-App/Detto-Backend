@@ -3,6 +3,7 @@ package com.dettoapp.routes
 import com.dettoapp.Utility.MailHelper
 import com.dettoapp.data.Classroom
 import com.dettoapp.data.ProjectModel
+import com.dettoapp.data.ProjectRubricsModel
 import com.opencsv.CSVWriter
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
@@ -14,7 +15,9 @@ import io.ktor.routing.route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.litote.kmongo.and
 import org.litote.kmongo.eq
+import org.litote.kmongo.json
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 
@@ -51,7 +54,7 @@ fun createReport(classroom: Classroom, email: String) {
 
             val writer = CSVWriter(OutputStreamWriter(outputStream),CSVWriter.DEFAULT_SEPARATOR,CSVWriter.DEFAULT_QUOTE_CHARACTER,CSVWriter.DEFAULT_ESCAPE_CHARACTER,CSVWriter.RFC4180_LINE_END)
 
-            val headers = arrayOf("Sl No", "Title", "Description", "Students")
+            val headers = arrayOf("Sl No", "Title", "Description", "Students","Marks")
             val data: ArrayList<Array<String>> = ArrayList()
             data.add(headers)
 
@@ -59,11 +62,20 @@ fun createReport(classroom: Classroom, email: String) {
                 val title = model.title.capitalize()
                 val description = model.desc.capitalize()
                 var students = ""
+                val pid=model.pid
+                var marks=""
+
 
                 for ((k, v) in model.projectStudentList) {
+                    val rubricsList= projectRubricsCollection.findOne(and(ProjectRubricsModel::pid eq pid,ProjectRubricsModel::usn eq k))!!.rubrics.titleMarksList
+                    var sum=0.0
+                    for(i in rubricsList){
+                        sum+=(i.marks*i.convertTo)/(i.maxMarks)
+                    }
                     students += "${k.toUpperCase()} - ${v.capitalize()}${CSVWriter.RFC4180_LINE_END}"
+                    marks +="${sum}${CSVWriter.RFC4180_LINE_END}"
                 }
-                data.add(arrayOf((index + 1).toString(), title, description, students))
+                data.add(arrayOf((index + 1).toString(), title, description, students,marks))
             }
             writer.writeAll(data)
             writer.flush()
