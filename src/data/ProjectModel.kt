@@ -12,6 +12,7 @@ data class ProjectModel(
     val cid:String,
     var status:String,
     val studentNameList:ArrayList<String> = ArrayList(),
-    val projectStudentList: HashMap<String, String> = HashMap()
+    val projectStudentList: HashMap<String, String> = HashMap(),
+    var githublink :String =""
 )
 
