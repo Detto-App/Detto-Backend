@@ -32,6 +32,7 @@ import io.ktor.routing.*
 import io.ktor.websocket.WebSockets
 import java.util.*
 
+
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 @Suppress("unused") // Referenced in application.conf
@@ -72,7 +73,11 @@ fun Application.module(testing: Boolean = false) {
         projectRoute()
         chat()
         deadlineRoute()
-        gDrive()
+        initializeData()
+        todoRoute()
+        reportRoute()
+        rubricsRoute()
+        submissionRoute()
     }
 
     repeatFetchGDriveToken()
@@ -120,7 +125,6 @@ fun Application.module(testing: Boolean = false) {
                     call.respond(HttpStatusCode.OK, "Hello")
                 }
             }
-
         }
 
         route("/deleteDb")
@@ -134,8 +138,20 @@ fun Application.module(testing: Boolean = false) {
                 call.respond(HttpStatusCode.OK)
             }
         }
-
     }
+}
+
+suspend fun WebSocketSession.sendText(frame: String) {
+    this.send(Frame.Text(frame))
+}
+
+fun <E> Queue<E>.print() {
+    val x = PriorityQueue<E>(this)
+    while (!x.isEmpty()) {
+        println(x.peek())
+        x.remove()
+    }
+}
 
 //    CoroutineScope(Dispatchers.IO).launch {
 //
@@ -161,20 +177,11 @@ fun Application.module(testing: Boolean = false) {
 //
 //    }
 
-}
-
-suspend fun WebSocketSession.sendText(frame: String) {
-    this.send(Frame.Text(frame))
-}
-
-fun <E> Queue<E>.print()
-{
-    val x = PriorityQueue<E>(this)
-    while (!x.isEmpty())
-    {
-        println(x.peek())
-        x.remove()
-    }
-}
+//GlobalScope.launch {
+//
+//}
+//
+////        ConfigLoader.loadProperties(Properties(),  /* addProperties = */false)
+//ConfigLoader.loadProperties(Properties(), true)
 
 

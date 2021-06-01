@@ -1,11 +1,7 @@
 package com.dettoapp.routes.Classroom
 
-import com.dettoapp.data.ClassRoomStudents
-import com.dettoapp.data.Classroom
-import com.dettoapp.data.StudentModel
-import com.dettoapp.routes.classRoomCollection
-import com.dettoapp.routes.classRoomStudentsCollection
-import com.dettoapp.routes.studentsCollection
+import com.dettoapp.data.*
+import com.dettoapp.routes.*
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.freemarker.FreeMarkerContent
@@ -20,6 +16,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.bson.Document
+import org.litote.kmongo.addToSet
+import org.litote.kmongo.and
 import org.litote.kmongo.eq
 import org.litote.kmongo.setValue
 
@@ -44,6 +42,62 @@ fun Route.classroomRoute() {
 
         }
     }
+
+    route("/addAccess/{tid}") {
+        post {
+            try {
+                val incomingData = call.receive<AccessModel>()
+                val tid = call.parameters["tid"]
+                teachersCollection.updateOne(TeacherModel::uid eq tid, addToSet(TeacherModel::accessmodelist, incomingData))
+                call.respond(HttpStatusCode.OK)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@post
+            }
+        }
+    }
+    route("/getTeacherModel/{tid}") {
+        get {
+            try {
+                val tid = call.parameters["tid"]
+//                teachersCollection.updateOne(TeacherModel::uid eq tid, addToSet(TeacherModel::accessmodelist, incomingData))
+                val teacherModel= teachersCollection.findOne(TeacherModel::uid eq tid)
+                if(teacherModel!=null)
+                    call.respond(HttpStatusCode.OK,teacherModel)
+                else
+                    call.respond(HttpStatusCode.BadRequest)
+
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+        }
+    }
+
+    route("/getAccessClassRooms/{access}/{sem}") {
+        get {
+            try {
+                val access = call.parameters["access"]
+                val sem = call.parameters["sem"]
+               if(access=="HOD") {
+                   val classRoomList = classRoomCollection.find().toList()
+                   call.respond(HttpStatusCode.OK, classRoomList)
+               }
+                else{
+                   val classRoomList= classRoomCollection.find(Classroom::sem eq sem).toList()
+                   call.respond(HttpStatusCode.OK, classRoomList)
+
+               }
+
+
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+        }
+    }
+
+
 
     authenticate {
         route("/getClassroom/{uid}") {
@@ -112,6 +166,7 @@ fun Route.classroomRoute() {
                     val classID = call.parameters["classid"]
                     classRoomCollection.findOneAndDelete(Classroom::classroomuid eq classID)
                     val classRoomStudents = classRoomStudentsCollection.findOneAndDelete(ClassRoomStudents::classID eq classID)
+                    projectCollection.deleteMany(ProjectModel::cid eq classID)
                     deleteClassIdInStudents(classRoomStudents)
                     call.respond(HttpStatusCode.OK)
                 } catch (e: Exception) {
@@ -207,3 +262,4 @@ private suspend fun deleteClassId(classId: String, studentId: String) {
         studentsCollection.updateOne(StudentModel::uid eq studentId, studentModel)
     }
 }
+
