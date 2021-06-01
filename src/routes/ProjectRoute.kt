@@ -39,12 +39,12 @@ fun Route.projectRoute() {
                     studentsCollection.updateOne(StudentModel::susn eq susn, addToSet(StudentModel::projects, incomeProject.pid))
 
                     val currentDateTime = LocalDateTime.now()
-                    val timeline= Timeline(
-                        UUID.randomUUID().toString(),
-                        "Project Created",
-                        ""+susn,
-                        currentDateTime.format(DateTimeFormatter.ISO_DATE),
-                        "0")
+                    val timeline = Timeline(
+                            UUID.randomUUID().toString(),
+                            "Project Created",
+                            "" + susn,
+                            currentDateTime.format(DateTimeFormatter.ISO_DATE),
+                            "0")
                     val timelineArray = ArrayList<Timeline>()
                     timelineArray.add(timeline)
                     timelineManagementCollection.insertOne(TimelineManagementModel(incomeProject.pid, timelineArray))
@@ -259,6 +259,33 @@ fun Route.projectRoute() {
                     call.respond(HttpStatusCode.BadRequest, "" + e.localizedMessage)
                     return@post
                 }
+            }
+        }
+    }
+
+    route("/getAutoProject/{cid}/{susn}")
+    {
+        get {
+            try {
+                val cid = call.parameters["cid"]
+                val susn = call.parameters["susn"]
+
+                var tempProject: ProjectModel? = null
+                val allProjects = projectCollection.find(ProjectModel::cid eq cid!!).toList()
+                allProjects.forEach {
+                    for ((k, v) in it.projectStudentList) {
+                        if (k.toLowerCase() == susn!!.toLowerCase()) {
+                            tempProject = it
+                            break
+                        }
+                    }
+                }
+                if (tempProject == null)
+                    call.respond(HttpStatusCode.BadRequest,"noProj")
+                else
+                    call.respond(HttpStatusCode.OK, tempProject!!)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest,""+e.localizedMessage)
             }
         }
     }
