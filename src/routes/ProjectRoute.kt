@@ -281,11 +281,11 @@ fun Route.projectRoute() {
                     }
                 }
                 if (tempProject == null)
-                    call.respond(HttpStatusCode.BadRequest,"noProj")
+                    call.respond(HttpStatusCode.BadRequest)
                 else
                     call.respond(HttpStatusCode.OK, tempProject!!)
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest,""+e.localizedMessage)
+                call.respond(HttpStatusCode.BadRequest)
             }
         }
     }
